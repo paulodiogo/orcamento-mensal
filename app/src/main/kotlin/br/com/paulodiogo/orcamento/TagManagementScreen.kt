@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,8 +34,7 @@ fun TagManagementScreen(viewModel: TagViewModel, padding: PaddingValues) {
     var editingId by rememberSaveable { mutableStateOf<String?>(null) }
     var editingName by rememberSaveable { mutableStateOf("") }
     var deleteId by rememberSaveable { mutableStateOf<String?>(null) }
-    Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Spacer(Modifier.height(12.dp))
+    ScreenContent(padding, horizontalPadding = 20.dp) {
         ScreenTitle("Tags", "Organize seus gastos por categoria")
         Button(onClick = { editingId = null; editingName = ""; showEditor = true }, modifier = Modifier.fillMaxWidth()) { Text("Criar nova tag") }
         when (val current = state) {

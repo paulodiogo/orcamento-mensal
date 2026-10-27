@@ -2,10 +2,9 @@ package br.com.paulodiogo.orcamento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -34,15 +33,12 @@ import java.util.Locale
 import java.time.YearMonth
 
 @Composable
-fun ReportScreen(viewModel: ReportViewModel, onBack: () -> Unit) {
+fun ReportScreen(viewModel: ReportViewModel, contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(), onBack: () -> Unit = {}) {
     var month by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
     val state by viewModel.state.collectAsState()
     LaunchedEffect(month) { viewModel.load(month) }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    ScreenContent(contentPadding, horizontalPadding = 16.dp) {
         ScreenTitle("Relatórios", "Entenda para onde seu dinheiro está indo")
         MonthField(value = month, onValueChange = { month = it }, modifier = Modifier.fillMaxWidth(), label = "Mês")
         when (val current = state) {

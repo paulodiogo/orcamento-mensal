@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -86,8 +84,8 @@ fun AppShell(
             when (destination) {
                 MainDestination.HOME -> HomeScreen(reports, expenses, todayMonth, padding) { destination = MainDestination.EXPENSES }
                 MainDestination.EXPENSES -> ExpenseHistoryScreen(expenses, tags, padding)
-                MainDestination.REPORTS -> ReportScreen(reports, {})
-                MainDestination.BUDGETS -> BudgetScreen(budgets, {})
+                MainDestination.REPORTS -> ReportScreen(reports, padding)
+                                MainDestination.BUDGETS -> BudgetScreen(budgets, padding)
                 MainDestination.TAGS -> TagManagementScreen(tagViewModel, padding)
             }
         }
@@ -124,8 +122,7 @@ private fun HomeScreen(
 ) {
     val state by reports.state.collectAsState()
     LaunchedEffect(month) { reports.load(month) }
-    Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Spacer(Modifier.height(12.dp))
+    ScreenContent(padding, horizontalPadding = 20.dp) {
         ScreenTitle("Olá, vamos organizar?", "Visão do seu orçamento em $month")
         when (val current = state) {
             ReportState.Idle, ReportState.Loading -> CircularProgressIndicator(Modifier.size(28.dp))
@@ -161,8 +158,7 @@ private fun ExpenseHistoryScreen(viewModel: ExpenseListViewModel, tags: List<Tag
     var selectedTag by rememberSaveable { mutableStateOf<String?>(null) }
     var withoutTag by rememberSaveable { mutableStateOf(false) }
     var deleteId by rememberSaveable { mutableStateOf<String?>(null) }
-    Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Spacer(Modifier.height(12.dp))
+    ScreenContent(padding, horizontalPadding = 20.dp) {
         ScreenTitle("Lançamentos", "Pesquise e encontre qualquer movimento")
         OutlinedTextField(query, { query = it; viewModel.refresh(query = it, tagId = selectedTag, withoutTag = withoutTag) }, Modifier.fillMaxWidth(), label = { Text("Pesquisar por descrição") }, singleLine = true)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

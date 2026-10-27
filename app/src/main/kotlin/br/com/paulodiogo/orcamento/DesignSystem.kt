@@ -2,9 +2,12 @@ package br.com.paulodiogo.orcamento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,6 +32,19 @@ fun BudgetTheme(content: @Composable () -> Unit) {
         androidx.compose.material3.lightColorScheme(primary = BudgetGreen, secondary = Color(0xFF4F6357), surface = Color(0xFFF9FBF8))
     }
     MaterialTheme(colorScheme = colors, content = content)
+}
+
+@Composable
+fun ScreenContent(
+    contentPadding: PaddingValues,
+    horizontalPadding: androidx.compose.ui.unit.Dp = 20.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(contentPadding).padding(horizontal = horizontalPadding),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        content = content,
+    )
 }
 
 @Composable

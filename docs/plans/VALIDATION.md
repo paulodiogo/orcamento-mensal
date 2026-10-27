@@ -1,5 +1,19 @@
 ﻿# Registro de Validação
 
+## Fase 15 — planejamento de orçamento associado a tags
+
+Nenhum comando de build, lint, teste, migração ou validação manual foi executado para esta fase. A estratégia e os cenários planejados estão em `docs/phases/phase-15-tag-budgets/VALIDATION.md`.
+
+## Fase 14 — 2026-10-27 — concluída e validada
+
+- `rtk .\gradlew.bat testDebugUnitTest` — sucesso.
+- `rtk .\gradlew.bat assembleDebug lintDebug` — sucesso.
+- `rtk .\gradlew.bat connectedDebugAndroidTest` — sucesso no `BUSAO(AVD) - 16`.
+- `rtk .\gradlew.bat ktlintCheck` — tarefa inexistente.
+- `rtk git diff --check` — sucesso.
+- Instalação e inicialização no `emulator-5554` — sucesso.
+- Capturas válidas e inspeção visual de Home, histórico, Relatórios, Orçamento, Tags e formulário — sucesso. A captura inicialmente inválida foi causada por prefixo UTF-16 acrescentado pelo redirecionamento PowerShell; a captura com `cmd.exe` produziu PNG válido.
+
 ## Fase 13 — 2026-10-27 — seleção de tags — concluída e aprovada
 
 - `rtk .\gradlew.bat testDebugUnitTest` — sucesso.

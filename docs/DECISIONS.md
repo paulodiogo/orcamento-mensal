@@ -17,6 +17,12 @@
 - **T-005 — exclusão:** remover a tag e suas linhas em `expense_tag` em uma transação, mantendo os lançamentos. A UI exibe a quantidade de classificações que serão removidas e solicita confirmação. O histórico financeiro permanece intacto; somente o agrupamento daquela tag deixa de existir.
 - **T-006 — composição técnica:** recomenda-se um único módulo `:app` e injeção manual inicial. Essa recomendação não altera requisitos de produto e será reavaliada na implementação aprovada.
 
+## Planejamento da Fase 15 — orçamento associado a tags
+
+- **D-007:** O orçamento associado à tag será opcional e persistido como `Long?` em centavos; `NULL` significa ausência e `0L` significa zero explicitamente definido. A migração Room 1→2 adicionará uma coluna nullable sem apagar dados ou associações.
+- **D-008:** A entrada seguirá `MoneyTextField` e a convenção brasileira existente. Valores negativos, inválidos e fora do intervalo de `Long` serão rejeitados. A criação idempotente de uma tag já existente não sobrescreverá seu orçamento; somente a edição explícita poderá alterá-lo ou removê-lo.
+- **D-009:** Esta decisão autoriza apenas cadastro, edição e persistência no formulário de tags. Não autoriza exibição, cálculo, comparação, acompanhamento, alertas ou relatórios por tag.
+
 ## Pendências reais
 - **P-001:** não há pendências de produto para este planejamento. A autorização da Fase 01 foi recebida.
 - **P-002:** AGP `9.4.1` foi confirmado pelo responsável e está configurado como versão oficial do projeto. Gradle `9.6.0` e JDK 17 permanecem oficiais.

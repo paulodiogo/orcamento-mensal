@@ -1,5 +1,13 @@
 # Progresso
 
+## Fase 15 — orçamento associado a tags — planejamento concluído
+
+Planejado exclusivamente o cadastro, edição e persistência de orçamento opcional por tag. A proposta usa `Long?` em centavos na entidade `tag`: `NULL` significa ausência e `0L` significa zero explícito. A migração incremental 1→2 adicionará coluna nullable sem apagar tags, despesas ou associações `expense_tag`. O editor de tags reutilizará `MoneyTextField`; nenhuma tela fora do formulário de tags exibirá ou consumirá o valor. Implementação, migração e testes permanecem não iniciados. Detalhes em `docs/phases/phase-15-tag-budgets/`.
+
+## Fase 14 — padronização do espaçamento superior — concluída e validada
+
+`ScreenContent` centraliza o consumo único do `PaddingValues` do `Scaffold` para Home, histórico, Tags, Relatórios e Orçamento; Relatórios e Orçamento passaram a receber o padding antes ausente. Modais Material 3 permaneceram fora do contêiner e sem alterações funcionais. `testDebugUnitTest`, `assembleDebug`, `lintDebug`, `connectedDebugAndroidTest` e `git diff --check` passaram; `ktlintCheck` não existe no projeto. A captura inicialmente preta foi diagnosticada como PNG corrompido pelo redirecionamento PowerShell (`FF FE FD FF`); capturas válidas foram produzidas com `cmd.exe`. Home, histórico, Relatórios, Orçamento, Tags e formulário foram verificados visualmente no `emulator-5554`, sem defeitos de alinhamento ou sobreposição observados.
+
 ## Fase 13 — redesign da seleção de tags e sincronização reativa — concluída e aprovada
 
 Autorizada em 2026-10-27. `TagSelector` modal Material 3 foi integrado ao formulário compartilhado de cadastro/edição, com pesquisa local, seleção múltipla temporária, aplicação/cancelamento, resumo compacto, lista rolável e encaminhamento para gerenciamento quando não há tags. IDs removidos da lista são descartados da seleção local. Modelo Room, operações transacionais, regras e dependências permanecem inalterados.

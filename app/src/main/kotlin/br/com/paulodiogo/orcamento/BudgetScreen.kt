@@ -3,10 +3,8 @@ package br.com.paulodiogo.orcamento
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,13 +38,12 @@ import java.util.Locale
 import java.time.YearMonth
 
 @Composable
-fun BudgetScreen(viewModel: BudgetViewModel, onBack: () -> Unit) {
+fun BudgetScreen(viewModel: BudgetViewModel, contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(), onBack: () -> Unit = {}) {
     val state by viewModel.state.collectAsState()
     val opening by viewModel.opening.collectAsState()
     val saving by viewModel.saving.collectAsState()
     var month by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
-    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Spacer(Modifier.height(12.dp))
+    ScreenContent(contentPadding, horizontalPadding = 20.dp) {
         ScreenTitle("Orçamentos", "Planeje cada mês sem misturar seus dados")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MonthField(value = month, onValueChange = { month = it }, modifier = Modifier.weight(1f), label = "Mês")

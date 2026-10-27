@@ -14,6 +14,7 @@
 | RN-010 | Renomear uma tag preserva associações e histórico; conflito de chave normalizada é recusado. Excluir tag remove apenas suas associações em transação, preservando todos os lançamentos. |
 | RN-011 | Criar/editar/excluir lançamento, criar/associar tags e excluir tag com suas associações ocorrem atomicamente nas respectivas operações. |
 | RN-012 | Configurar/editar orçamento não modifica lançamentos nem os bloqueia por ultrapassagem. |
+| RN-013 | Orçamento por tag é opcional: ausência é `NULL`, enquanto zero explícito é `0` em centavos; sua edição não altera nome, identidade ou associações da tag. A regra será implementada somente após autorização da Fase 15. |
 
 Possibilidade futura fora de escopo: rateio explícito por tag, que exigiria nova regra de soma e migração.
 

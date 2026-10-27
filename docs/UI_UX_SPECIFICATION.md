@@ -7,6 +7,7 @@
 | Novo/editar lançamento | Descrição, valor, data, chips opcionais de tags e salvar/excluir; criar ou reutilizar tag no próprio formulário. | Descrição/valor inválidos em campo; nenhuma tag é exigida; tags duplicadas são ignoradas. |
 | Lista | Pesquisar, filtrar por mês/período/tag ou por lançamentos sem tag, editar e excluir confirmado. | Sem resultados com opção de limpar filtros; lançamentos sem tags continuam na lista geral. |
 | Detalhe da tag | Total de associações, lançamentos classificados e ação para renomear/excluir. | Antes de excluir, informar a quantidade de classificações removidas e confirmar; não há hierarquia. |
+| Editor de tag — Fase 15 | Nome e orçamento opcional no formulário existente de criação/edição. | Campo vazio significa sem orçamento (`NULL`); erro monetário aparece no próprio campo; cancelar descarta alterações. O orçamento não é exibido fora deste formulário nesta fase. |
 | Orçamento | Criar ou editar o único orçamento do mês. | Valor inválido; esclarecer que gastos permanecem. |
 | Abrir mês | Exibir mês e sugestão editável, confirmar explicitamente. | Sem anterior: sem sugestão. |
 | Histórico | Listar meses com orçamento, gasto e saldo. | Sem meses: orientar a criar orçamento. |
