@@ -1,5 +1,11 @@
 # Progresso
 
+## Fase 13 — redesign da seleção de tags — implementação concluída, validação manual bloqueada
+
+Autorizada em 2026-10-27. `TagSelector` modal Material 3 foi integrado ao formulário compartilhado de cadastro/edição, com pesquisa local, seleção múltipla temporária, aplicação/cancelamento, resumo compacto, lista rolável e encaminhamento para gerenciamento quando não há tags. IDs removidos da lista são descartados da seleção local. Modelo Room, operações transacionais, regras e dependências permanecem inalterados.
+
+Validação técnica: `testDebugUnitTest`, `assembleDebug`, `lintDebug`, `connectedDebugAndroidTest` e `git diff --check` passaram; `ktlintCheck` não existe no projeto. A primeira instalação/inicialização no `emulator-5554` exibiu tela preta e `uiautomator dump` falhou; após reiniciar o emulador, sem limpar dados, a UI Compose renderizou e a árvore foi inspecionada. Não houve exceção do aplicativo nos logs. A causa mais provável é falha transitória do ambiente gráfico/UiAutomation, recuperada por reboot, sem correção de código. A fase permanece aberta para os cenários manuais restantes de persistência, edição, cancelamento, múltiplas tags, lista vazia, remoção/renomeação e temas.
+
 ## Correção de sincronização após criação de despesa — implementada; validação técnica pendente
 
 Causa identificada: `ExpenseDao` expunha apenas consultas `suspend`, e `ExpenseListViewModel`/`ReportViewModel` carregavam dados somente por chamadas explícitas. Após `create`, a lista era recarregada, mas o resumo da tela principal permanecia no `ReportViewModel` sem invalidação, portanto não observava a alteração do Room.

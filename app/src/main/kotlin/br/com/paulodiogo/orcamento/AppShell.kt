@@ -94,7 +94,7 @@ fun AppShell(
     }
 
     if (showCreate) {
-        CreateExpenseDialog(tags = tags, saving = expenseSaving, onDismiss = { showCreate = false }, onSave = { description, amountCents, date, selectedTags ->
+        CreateExpenseDialog(tags = tags, saving = expenseSaving, onDismiss = { showCreate = false }, onManageTags = { showCreate = false; destination = MainDestination.TAGS }, onSave = { description, amountCents, date, selectedTags ->
             expenses.create(description, amountCents, date, selectedTags) { showCreate = false }
         })
     }
@@ -107,6 +107,7 @@ fun AppShell(
             initialTagIds = selectedTags,
             saving = expenseSaving,
             onDismiss = { expenses.clearEditing() },
+            onManageTags = { expenses.clearEditing(); destination = MainDestination.TAGS },
         ) { description, amountCents, date, tagIds ->
             expenses.updateExpense(expense, description, amountCents, date, tagIds) { expenses.clearEditing() }
         }

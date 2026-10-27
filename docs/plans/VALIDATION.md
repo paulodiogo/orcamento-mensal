@@ -1,5 +1,19 @@
 ﻿# Registro de Validação
 
+## Fase 13 — 2026-10-27 — seleção de tags
+
+- `rtk .\gradlew.bat testDebugUnitTest` — sucesso.
+- `rtk .\gradlew.bat assembleDebug` — sucesso.
+- `rtk .\gradlew.bat lintDebug` — sucesso.
+- `rtk .\gradlew.bat connectedDebugAndroidTest` — sucesso no `BUSAO(AVD) - 16`.
+- `rtk .\gradlew.bat ktlintCheck` — tarefa inexistente; não aplicável.
+- `rtk git diff --check` — sucesso.
+- APK atual reinstalado com `adb install -r`; a primeira captura mostrou tela preta e `uiautomator dump` retornou `ERROR: null root node returned by UiTestAutomationBridge`.
+- `adb reboot` foi executado sem limpar dados. Após reinício, `MainActivity` renderizou; `uiautomator dump` identificou a árvore Compose, formulário, modal, campo de pesquisa, tag disponível e ações. A pesquisa `zzzzz` exibiu `Nenhuma tag corresponde à pesquisa.`.
+- Logs não apresentaram exceção não tratada do aplicativo, Compose, Room ou SQLite. A evidência aponta falha transitória de renderização/UiAutomation do emulador, recuperada pelo reboot, sem correção de código.
+
+A Fase 13 permanece aberta para concluir os cenários manuais de persistência, edição, cancelamento, múltiplas tags, lista vazia, remoção/renomeação e temas.
+
 ## Correção de sincronização após criação de despesa — 2026-10-27
 
 - `rtk .\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso em 9s; testes JVM, build debug e lint concluídos sem falhas.

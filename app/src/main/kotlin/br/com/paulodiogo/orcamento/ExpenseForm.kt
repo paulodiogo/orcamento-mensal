@@ -1,22 +1,28 @@
 package br.com.paulodiogo.orcamento
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.TextButton
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import br.com.paulodiogo.orcamento.domain.InvalidMoneyInput
@@ -25,7 +31,93 @@ import br.com.paulodiogo.orcamento.domain.moneyDigitsFromCents
 import br.com.paulodiogo.orcamento.domain.parseMoneyDigitsToCents
 import br.com.paulodiogo.orcamento.domain.validateExpenseAmount
 
-@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TagSelector(
+    tags: List<br.com.paulodiogo.orcamento.data.TagEntity>,
+    selectedTagIds: Set<String>,
+    onSelectionChange: (Set<String>) -> Unit,
+    onManageTags: () -> Unit,
+) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var pendingTagIds by rememberSaveable { mutableStateOf(emptySet<String>()) }
+
+    LaunchedEffect(tags) {
+        val availableIds = tags.map { it.id }.toSet()
+        onSelectionChange(selectedTagIds.intersect(availableIds))
+        pendingTagIds = pendingTagIds.intersect(availableIds)
+    }
+
+    val summary = when (selectedTagIds.size) {
+        0 -> "Nenhuma tag selecionada"
+        1 -> "1 tag"
+        else -> "${selectedTagIds.size} tags"
+    }
+
+    OutlinedButton(
+        onClick = { pendingTagIds = selectedTagIds; query = ""; open = true },
+        modifier = Modifier.fillMaxWidth().testTag("tagSelector"),
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column {
+                Text("Tags (opcional)")
+                Text(summary)
+            }
+            Text("▾")
+        }
+    }
+
+    if (open) {
+        val filteredTags = tags.filter { it.name.contains(query, ignoreCase = true) }
+        AlertDialog(
+            onDismissRequest = { open = false },
+            title = { Text("Selecionar tags") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Pesquisar tags") },
+                        singleLine = true,
+                    )
+                    if (tags.isEmpty()) {
+                        Text("Nenhuma tag cadastrada. Crie uma tag na tela Tags.")
+                    } else if (filteredTags.isEmpty()) {
+                        Text("Nenhuma tag corresponde à pesquisa.")
+                    } else {
+                        LazyColumn(modifier = Modifier.heightIn(max = 280.dp)) {
+                            items(filteredTags, key = { it.id }) { tag ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text(tag.name, modifier = Modifier.weight(1f).padding(vertical = 8.dp))
+                                    Checkbox(
+                                        checked = tag.id in pendingTagIds,
+                                        onCheckedChange = { checked ->
+                                            pendingTagIds = if (checked) pendingTagIds + tag.id else pendingTagIds - tag.id
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { onSelectionChange(pendingTagIds); open = false }) { Text("Aplicar") }
+            },
+            dismissButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (tags.isEmpty()) TextButton(onClick = onManageTags) { Text("Gerenciar tags") }
+                    TextButton(onClick = { open = false }) { Text("Cancelar") }
+                }
+            },
+        )
+    }
+}
+
 @Composable
 fun CreateExpenseDialog(
     tags: List<br.com.paulodiogo.orcamento.data.TagEntity>,
@@ -35,6 +127,7 @@ fun CreateExpenseDialog(
     initialTagIds: Set<String> = emptySet(),
     saving: Boolean = false,
     onDismiss: () -> Unit,
+    onManageTags: () -> Unit = {},
     onSave: (String, Long, String, List<String>) -> Unit,
 ) {
     val emptyInputMessage = stringResource(R.string.money_field_no_digits)
@@ -77,21 +170,12 @@ fun CreateExpenseDialog(
                     label = "Data",
                     testTag = "expenseDateField",
                 )
-                FlowRow {
-                    tags.forEach { tag ->
-                        FilterChip(
-                            selected = tag.id in selectedTagIds,
-                            onClick = {
-                                selectedTagIds = if (tag.id in selectedTagIds) {
-                                    selectedTagIds - tag.id
-                                } else {
-                                    selectedTagIds + tag.id
-                                }
-                            },
-                            label = { Text(tag.name) },
-                        )
-                    }
-                }
+                TagSelector(
+                    tags = tags,
+                    selectedTagIds = selectedTagIds,
+                    onSelectionChange = { selectedTagIds = it },
+                    onManageTags = onManageTags,
+                )
                 error?.let { Text(it) }
             }
         },
