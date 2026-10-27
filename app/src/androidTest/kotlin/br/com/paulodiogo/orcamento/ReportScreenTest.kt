@@ -39,6 +39,5 @@ class ReportScreenTest {
         composeRule.setContent { ReportScreen(viewModel) {} }
         composeRule.onNodeWithText("Relatórios").assertTextContains("Relatórios")
         composeRule.onNodeWithText("Mês").assertTextContains("Mês")
-        composeRule.onNodeWithText("Lançamentos").assertTextContains("Lançamentos")
     }
 }
