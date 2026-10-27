@@ -1,5 +1,14 @@
 ﻿# Registro de Validação
 
+## Fase 10 — 2026-10-27 — correções finais de UX
+
+- `rtk .\\gradlew.bat assembleDebug lintDebug testDebugUnitTest connectedDebugAndroidTest` — sucesso; build, lint, testes JVM e instrumentados no BUSAO (AVD) - 16 passaram.
+- `rtk git diff --check` — sucesso.
+- APK instalado e iniciado com `adb`; capturas legíveis examinadas: `app/build/final-navigation-readable.jpg` e `app/build/final-history-readable.jpg`.
+- Navegação para `Lançamentos` e abertura do formulário foram executadas manualmente. O preenchimento manual não foi concluído por coordenadas inválidas após alteração da geometria do teclado; nenhum CRUD foi declarado aprovado.
+- Drawables vetoriais locais adicionados para navegação e adição; nenhuma dependência foi alterada.
+- Escopo confirmado pelo usuário: somente despesas e tags sem limites financeiros por tag; receitas e limites por tag estão fora do escopo e não são pendências.
+
 ## Fases 08 e 09 — 2026-10-27
 
 - Implementado e testado o fluxo de orçamento mensal: abertura, sugestão do mês anterior, edição sem duplicação e histórico isolado.

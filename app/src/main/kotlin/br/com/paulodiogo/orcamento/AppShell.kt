@@ -20,6 +20,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
@@ -68,16 +69,16 @@ fun AppShell(
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(onClick = { showCreate = true }) {
-                    Text("+")
+                    Icon(painterResource(R.drawable.ic_nav_add), "Adicionar lançamento")
                 }
             },
             bottomBar = {
                 NavigationBar {
-                    NavigationBarItem(destination == MainDestination.HOME, { destination = MainDestination.HOME }, icon = { Text("⌂") }, label = { Text("Início") })
-                    NavigationBarItem(destination == MainDestination.EXPENSES, { destination = MainDestination.EXPENSES }, icon = { Text("≡") }, label = { Text("Despesas") })
-                    NavigationBarItem(destination == MainDestination.REPORTS, { destination = MainDestination.REPORTS }, icon = { Text("▥") }, label = { Text("Relatórios") })
-                    NavigationBarItem(destination == MainDestination.BUDGETS, { destination = MainDestination.BUDGETS }, icon = { Text("$") }, label = { Text("Orçamento") })
-                    NavigationBarItem(destination == MainDestination.TAGS, { destination = MainDestination.TAGS }, icon = { Text("#") }, label = { Text("Tags") })
+                    NavigationBarItem(destination == MainDestination.HOME, { destination = MainDestination.HOME }, icon = { Icon(painterResource(R.drawable.ic_nav_home), "Início") }, label = { Text("Início") })
+                    NavigationBarItem(destination == MainDestination.EXPENSES, { destination = MainDestination.EXPENSES }, icon = { Icon(painterResource(R.drawable.ic_nav_expenses), "Despesas") }, label = { Text("Despesas") })
+                    NavigationBarItem(destination == MainDestination.REPORTS, { destination = MainDestination.REPORTS }, icon = { Icon(painterResource(R.drawable.ic_nav_reports), "Relatórios") }, label = { Text("Relatórios") })
+                    NavigationBarItem(destination == MainDestination.BUDGETS, { destination = MainDestination.BUDGETS }, icon = { Icon(painterResource(R.drawable.ic_nav_budget), "Orçamento") }, label = { Text("Orçamento") })
+                    NavigationBarItem(destination == MainDestination.TAGS, { destination = MainDestination.TAGS }, icon = { Icon(painterResource(R.drawable.ic_nav_tags), "Tags") }, label = { Text("Tags") })
                 }
             },
         ) { padding ->
