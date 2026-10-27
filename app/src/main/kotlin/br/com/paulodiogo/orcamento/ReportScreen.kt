@@ -31,10 +31,11 @@ import br.com.paulodiogo.orcamento.domain.ReportViewModel
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Locale
+import java.time.YearMonth
 
 @Composable
 fun ReportScreen(viewModel: ReportViewModel, onBack: () -> Unit) {
-    var month by rememberSaveable { mutableStateOf("2026-10") }
+    var month by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
     val state by viewModel.state.collectAsState()
     LaunchedEffect(month) { viewModel.load(month) }
 
@@ -47,13 +48,7 @@ fun ReportScreen(viewModel: ReportViewModel, onBack: () -> Unit) {
             Text("Período analisado", style = MaterialTheme.typography.labelLarge)
             TextButton(onClick = onBack) { Text("Lançamentos") }
         }
-        OutlinedTextField(
-            value = month,
-            onValueChange = { month = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Mês (AAAA-MM)") },
-            singleLine = true,
-        )
+        MonthField(value = month, onValueChange = { month = it }, modifier = Modifier.fillMaxWidth(), label = "Mês")
         when (val current = state) {
             ReportState.Idle, ReportState.Loading -> CircularProgressIndicator()
             ReportState.Empty -> Text("Nenhum dado no período")

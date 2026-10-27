@@ -37,13 +37,14 @@ import br.com.paulodiogo.orcamento.domain.parseMoneyDigitsToCents
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Locale
+import java.time.YearMonth
 
 @Composable
 fun BudgetScreen(viewModel: BudgetViewModel, onBack: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val opening by viewModel.opening.collectAsState()
     val saving by viewModel.saving.collectAsState()
-    var month by rememberSaveable { mutableStateOf("2026-10") }
+    var month by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Spacer(Modifier.height(12.dp))
         ScreenTitle("Orçamentos", "Planeje cada mês sem misturar seus dados")
@@ -52,7 +53,7 @@ fun BudgetScreen(viewModel: BudgetViewModel, onBack: () -> Unit) {
             TextButton(onClick = onBack) { Text("Lançamentos") }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(month, { month = it }, Modifier.weight(1f), label = { Text("Mês (AAAA-MM)") }, singleLine = true)
+            MonthField(value = month, onValueChange = { month = it }, modifier = Modifier.weight(1f), label = "Mês")
             Button(onClick = { viewModel.openMonth(month) }) { Text("Abrir mês") }
         }
         when (val current = state) {

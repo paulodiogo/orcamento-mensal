@@ -127,7 +127,7 @@ class MainActivityComposeTest {
         }
         composeRule.onNodeWithText("Descrição").performTextInput("Compra")
         composeRule.onNodeWithTag("moneyTextField").performTextInput("12345")
-        composeRule.onNodeWithText("Data (AAAA-MM-DD)").performTextInput("2026-10-27")
+        composeRule.onNodeWithTag("expenseDateField").assertTextContains("27/10/2026")
         composeRule.onNodeWithText("Salvar").performClick()
         composeRule.runOnIdle { assertEquals(12_345L, savedCents) }
 

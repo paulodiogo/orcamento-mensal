@@ -3,6 +3,7 @@ package br.com.paulodiogo.orcamento
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.ViewModelStore
@@ -59,7 +60,7 @@ class ExpenseFormPersistenceTest {
 
         composeRule.onNodeWithText("Descrição").performTextInput("Compra")
         composeRule.onNodeWithTag("moneyTextField").performTextInput("12345")
-        composeRule.onNodeWithText("Data (AAAA-MM-DD)").performTextInput("2026-10-27")
+        composeRule.onNodeWithTag("expenseDateField").assertTextContains(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))
         composeRule.onNodeWithText("Salvar").performClick()
         composeRule.waitUntil(5_000) {
             runBlocking { database.expenseDao().findAll().isNotEmpty() }

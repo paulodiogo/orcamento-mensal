@@ -1,5 +1,13 @@
 # Progresso
 
+## Fase 12 — datas e DatePicker — implementação parcial
+
+Implementado componente reutilizável em `DateFields.kt` com apresentação brasileira, DatePicker Material 3 sem conversão UTC de data civil, confirmação/cancelamento e seletor mensal simples. Novo cadastro usa `LocalDate.now()`, edição preserva `occurredOn`, filtros De/Até permanecem vazios e orçamento/relatório usam `YearMonth.now()` sem redefinição por recomposição. Não houve mudança em Room, dependências, versões ou regras de negócio.
+
+Validação: `testDebugUnitTest assembleDebug lintDebug` passou; `connectedDebugAndroidTest` passou com 27 testes; APK debug instalado e atividade iniciada no emulador. A validação manual interativa dos fluxos de calendário, filtros e navegação ainda não foi concluída. Detalhes em `docs/phases/phase-12-date-picker/VALIDATION.md`.
+
+**Estado:** implementação parcial; não declarar fase concluída até completar a validação manual e revisar os critérios pendentes.
+
 ## Fase 11 — entrada monetária — implementada e validada localmente
 
 Implementados o formatador/conversor compartilhado e `MoneyTextField` para cadastro/edição de despesas e orçamento mensal. O campo utiliza dígitos com centavos implícitos, máscara brasileira, centavos `Long`, colagem sanitizada, cursor/seleção e teclado numérico; despesas continuam positivas e orçamento aceita zero. Não houve mudança no esquema Room, regras financeiras, dependências ou versões.

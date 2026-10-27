@@ -38,7 +38,7 @@ class ReportScreenTest {
     fun showsReportPeriodAndNavigationAction() {
         composeRule.setContent { ReportScreen(viewModel) {} }
         composeRule.onNodeWithText("Relatórios").assertTextContains("Relatórios")
-        composeRule.onNodeWithText("Mês (AAAA-MM)").assertTextContains("Mês (AAAA-MM)")
+        composeRule.onNodeWithText("Mês").assertTextContains("Mês")
         composeRule.onNodeWithText("Lançamentos").assertTextContains("Lançamentos")
     }
 }

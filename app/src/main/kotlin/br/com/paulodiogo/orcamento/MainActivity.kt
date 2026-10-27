@@ -105,27 +105,26 @@ private fun ExpenseListScreen(viewModel: ExpenseListViewModel, onReports: () -> 
             label = { Text("Pesquisar por descrição") },
             singleLine = true,
         )
-        OutlinedTextField(
+        MonthField(
             value = selectedMonth,
             onValueChange = { selectedMonth = it; viewModel.refresh(query = query, month = it.ifBlank { null }, startDate = rangeStart.ifBlank { null }, endDate = rangeEnd.ifBlank { null }, tagId = selectedTagId, withoutTag = withoutTag) },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Mês (AAAA-MM)") },
-            singleLine = true,
+            label = "Mês",
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
+            DateField(
                 value = rangeStart,
                 onValueChange = { rangeStart = it; viewModel.refresh(query = query, month = selectedMonth.ifBlank { null }, startDate = it.ifBlank { null }, endDate = rangeEnd.ifBlank { null }, tagId = selectedTagId, withoutTag = withoutTag) },
                 modifier = Modifier.weight(1f),
-                label = { Text("De") },
-                singleLine = true,
+                label = "De",
+                allowEmpty = true,
             )
-            OutlinedTextField(
+            DateField(
                 value = rangeEnd,
                 onValueChange = { rangeEnd = it; viewModel.refresh(query = query, month = selectedMonth.ifBlank { null }, startDate = rangeStart.ifBlank { null }, endDate = it.ifBlank { null }, tagId = selectedTagId, withoutTag = withoutTag) },
                 modifier = Modifier.weight(1f),
-                label = { Text("Até") },
-                singleLine = true,
+                label = "Até",
+                allowEmpty = true,
             )
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

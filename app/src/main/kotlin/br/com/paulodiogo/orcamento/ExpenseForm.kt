@@ -49,7 +49,9 @@ fun CreateExpenseDialog(
     var amountDigits by rememberSaveable(initialAmountCents) {
         mutableStateOf(initialAmountCents?.let(::moneyDigitsFromCents) ?: "")
     }
-    var occurredOn by rememberSaveable(initialOccurredOn) { mutableStateOf(initialOccurredOn) }
+    var occurredOn by rememberSaveable(initialOccurredOn) {
+        mutableStateOf(initialOccurredOn.ifBlank { todayIsoDate() })
+    }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var amountError by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedTagIds by rememberSaveable(initialTagIds) { mutableStateOf(initialTagIds) }
@@ -68,7 +70,13 @@ fun CreateExpenseDialog(
                     error = amountError,
                     onInputError = { amountError = it },
                 )
-                OutlinedTextField(occurredOn, { occurredOn = it }, Modifier.fillMaxWidth(), label = { Text("Data (AAAA-MM-DD)") })
+                DateField(
+                    value = occurredOn,
+                    onValueChange = { occurredOn = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = "Data",
+                    testTag = "expenseDateField",
+                )
                 FlowRow {
                     tags.forEach { tag ->
                         FilterChip(
