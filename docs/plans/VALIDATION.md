@@ -1,5 +1,12 @@
 ﻿# Registro de Validação
 
+## Correção de sincronização após criação de despesa — 2026-10-27
+
+- `rtk .\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso em 9s; testes JVM, build debug e lint concluídos sem falhas.
+- `rtk .\gradlew.bat connectedDebugAndroidTest` — sucesso no BUSAO (AVD) - 16; testes instrumentados concluídos sem falhas. Houve apenas warnings de depreciação preexistentes em `createComposeRule`.
+- Validação manual ainda não executada para esta correção.
+
+
 ## Fase 11 — 2026-10-27 — entrada monetária
 
 - `rtk .\\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso: build e lint aprovados; 23 testes JVM, 0 falhas/erros/ignorados.

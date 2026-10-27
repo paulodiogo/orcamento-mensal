@@ -1,5 +1,15 @@
 # Progresso
 
+## Correção de sincronização após criação de despesa — implementada; validação técnica pendente
+
+Causa identificada: `ExpenseDao` expunha apenas consultas `suspend`, e `ExpenseListViewModel`/`ReportViewModel` carregavam dados somente por chamadas explícitas. Após `create`, a lista era recarregada, mas o resumo da tela principal permanecia no `ReportViewModel` sem invalidação, portanto não observava a alteração do Room.
+
+A correção adiciona `ExpenseDao.observeAll(): Flow<List<ExpenseEntity>>`, mantém a filtragem da lista derivada desse fluxo e faz o relatório mensal observar o mesmo fluxo, recalculando total, saldo disponível e totais por tag após inserção, edição ou exclusão. O fluxo transacional de persistência e o comportamento para outros meses permanecem preservados.
+
+Validação técnica: `rtk .\gradlew.bat testDebugUnitTest assembleDebug lintDebug` passou em 9s; testes JVM, build de debug e lint concluídos sem falhas. Testes instrumentados e validação manual ainda pendentes.
+
+**Estado:** implementação concluída e tecnicamente validada em JVM/build/lint; instrumentação e validação manual permanecem pendentes.
+
 ## Fase 12 — datas e DatePicker — implementação parcial
 
 Implementado componente reutilizável em `DateFields.kt` com apresentação brasileira, DatePicker Material 3 sem conversão UTC de data civil, confirmação/cancelamento e seletor mensal simples. Novo cadastro usa `LocalDate.now()`, edição preserva `occurredOn`, filtros De/Até permanecem vazios e orçamento/relatório usam `YearMonth.now()` sem redefinição por recomposição. Não houve mudança em Room, dependências, versões ou regras de negócio.

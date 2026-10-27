@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ExpenseDao {
@@ -16,6 +17,9 @@ interface ExpenseDao {
 
     @Query("SELECT * FROM expense ORDER BY occurredOn DESC, id DESC")
     suspend fun findAll(): List<ExpenseEntity>
+
+    @Query("SELECT * FROM expense ORDER BY occurredOn DESC, id DESC")
+    fun observeAll(): Flow<List<ExpenseEntity>>
 
     @Query("SELECT * FROM expense WHERE occurredOn BETWEEN :startDate AND :endDate ORDER BY occurredOn DESC, id DESC")
     suspend fun findBetween(startDate: String, endDate: String): List<ExpenseEntity>

@@ -9,6 +9,8 @@ import br.com.paulodiogo.orcamento.data.TagEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 sealed interface ExpenseListState {
@@ -45,8 +47,32 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
     private var currentWithoutTag = false
 
     init {
-        refresh()
+        database.expenseDao().observeAll()
+            .onEach { expenses -> publish(expenses) }
+            .launchIn(viewModelScope)
         refreshTags()
+    }
+
+    private suspend fun publish(expenses: List<ExpenseEntity>) {
+        runCatching {
+            val relations = expenses.associate { expense ->
+                expense.id to database.expenseTagDao().findTagIdsForExpense(expense.id).toSet()
+            }
+            filterExpenses(
+                expenses,
+                currentQuery,
+                currentMonth,
+                currentStartDate,
+                currentEndDate,
+                relations,
+                currentTagId,
+                currentWithoutTag,
+            )
+        }.onSuccess { filtered ->
+            _state.value = if (filtered.isEmpty()) ExpenseListState.Empty else ExpenseListState.Content(filtered)
+        }.onFailure { error ->
+            _state.value = ExpenseListState.Error(error.message ?: "Não foi possível carregar os lançamentos")
+        }
     }
 
     fun refreshTags() {
@@ -69,17 +95,9 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
         currentEndDate = endDate
         currentTagId = tagId
         currentWithoutTag = withoutTag
+        _state.value = ExpenseListState.Loading
         viewModelScope.launch {
-            _state.value = ExpenseListState.Loading
-            runCatching {
-                val expenses = operations.findAll()
-                val relations = expenses.associate { it.id to database.expenseTagDao().findTagIdsForExpense(it.id).toSet() }
-                filterExpenses(expenses, query, month, startDate, endDate, relations, tagId, withoutTag)
-            }.onSuccess { expenses ->
-                _state.value = if (expenses.isEmpty()) ExpenseListState.Empty else ExpenseListState.Content(expenses)
-            }.onFailure { error ->
-                _state.value = ExpenseListState.Error(error.message ?: "Não foi possível carregar os lançamentos")
-            }
+            publish(operations.findAll())
         }
     }
 
