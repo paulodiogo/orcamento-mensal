@@ -1,0 +1,35 @@
+[versions]
+agp = "9.4.1"
+kotlin = "2.2.10"
+room = "2.8.5"
+ksp = "2.3.12"
+junit = "4.13.2"
+testExtJunit = "1.2.1"
+testRunner = "1.6.2"
+testCore = "1.6.1"
+composeBom = "2026.09.00"
+activityCompose = "1.13.0"
+coreKtx = "1.17.0"
+
+[libraries]
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+junit = { module = "junit:junit", version.ref = "junit" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "testExtJunit" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "testRunner" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "testCore" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+
