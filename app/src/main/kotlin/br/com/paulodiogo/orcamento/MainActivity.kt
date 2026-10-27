@@ -51,21 +51,16 @@ class MainActivity : ComponentActivity() {
     private val budgetViewModel: br.com.paulodiogo.orcamento.domain.BudgetViewModel by viewModels {
         br.com.paulodiogo.orcamento.domain.BudgetViewModel.Factory(BudgetDatabase.getInstance(applicationContext))
     }
+    private val tagViewModel: br.com.paulodiogo.orcamento.domain.TagViewModel by viewModels {
+        br.com.paulodiogo.orcamento.domain.TagViewModel.Factory(BudgetDatabase.getInstance(applicationContext))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val darkTheme = isSystemInDarkTheme()
-            MaterialTheme(colorScheme = if (darkTheme) darkColorScheme() else lightColorScheme()) {
-                Surface {
-                    var showReports by rememberSaveable { mutableStateOf(false) }
-                    var showBudgets by rememberSaveable { mutableStateOf(false) }
-                    when {
-                        showReports -> ReportScreen(reportViewModel) { showReports = false }
-                        showBudgets -> BudgetScreen(budgetViewModel) { showBudgets = false }
-                        else -> ExpenseListScreen(viewModel, onReports = { showReports = true }, onBudgets = { showBudgets = true })
-                    }
-                }
+            Surface {
+                AppShell(viewModel, reportViewModel, budgetViewModel, tagViewModel)
             }
         }
     }

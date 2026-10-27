@@ -9,10 +9,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,9 +42,10 @@ fun ReportScreen(viewModel: ReportViewModel, onBack: () -> Unit) {
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        ScreenTitle("Relatórios", "Entenda para onde seu dinheiro está indo")
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Relatórios", style = MaterialTheme.typography.headlineSmall)
-            Button(onClick = onBack) { Text("Lançamentos") }
+            Text("Período analisado", style = MaterialTheme.typography.labelLarge)
+            TextButton(onClick = onBack) { Text("Lançamentos") }
         }
         OutlinedTextField(
             value = month,
@@ -54,19 +59,29 @@ fun ReportScreen(viewModel: ReportViewModel, onBack: () -> Unit) {
             ReportState.Empty -> Text("Nenhum dado no período")
             is ReportState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
             is ReportState.Content -> {
-                Text("Orçamento: ${current.budgetCents?.let(::formatCents) ?: "não configurado"}")
-                Text("Total gasto: ${formatCents(current.execution.spentCents)}")
-                Text("Saldo: ${formatCents(current.execution.availableCents)}")
-                Text("Execução: ${current.execution.percentage?.let { formatPercentage(it) } ?: "indisponível"}")
-                Text("Por tag", style = MaterialTheme.typography.titleMedium)
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Saldo disponível", style = MaterialTheme.typography.labelLarge)
+                        Text(formatCents(current.execution.availableCents), style = MaterialTheme.typography.headlineMedium)
+                        Text("Orçamento: ${current.budgetCents?.let(::formatCents) ?: "não configurado"}")
+                        Text("Gasto: ${formatCents(current.execution.spentCents)}")
+                        Text("Consumo: ${current.execution.percentage?.let { formatPercentage(it) } ?: "indisponível"}")
+                        current.execution.percentage?.let { LinearProgressIndicator({ (it.toDouble() / 100.0).coerceIn(0.0, 1.0).toFloat() }, Modifier.fillMaxWidth()) }
+                    }
+                }
+                Text("Distribuição por tag", style = MaterialTheme.typography.titleMedium)
                 if (current.tagTotals.isEmpty()) {
                     Text("Nenhuma tag no período")
                 } else {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(current.tagTotals, key = { it.tagId }) { total ->
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(total.tagName)
-                                Text(formatCents(total.amountCents))
+                            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(total.tagName)
+                                    Text(formatCents(total.amountCents), style = MaterialTheme.typography.titleSmall)
+                                }
+                                val totalSpent = current.execution.spentCents.coerceAtLeast(1L)
+                                LinearProgressIndicator({ (total.amountCents.toDouble() / totalSpent).coerceIn(0.0, 1.0).toFloat() }, Modifier.fillMaxWidth())
                             }
                         }
                     }

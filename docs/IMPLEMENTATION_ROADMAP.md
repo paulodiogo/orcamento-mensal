@@ -12,6 +12,7 @@
 | 07 | Meses e histórico | 06 | Abertura explícita, sugestão/histórico testados. |
 | 08 | Qualidade UX | 07 | Erros, estados vazios e refinamento validados. |
 | 09 | Validação final | 08 | Suite prevista, revisão e preparação de distribuição. |
+| 10 | Redesign incremental da interface | 09 | Navegação, visão mensal, cadastro, histórico, tags e relatórios redesenhados com regras preservadas. |
 
 Cada fase requer autorização explícita após sua conclusão. Consulte os documentos em `phases/` para escopo, tarefas, aceite e estado.
 
