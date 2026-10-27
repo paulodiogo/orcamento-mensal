@@ -14,4 +14,7 @@ interface ExpenseTagDao {
 
     @Query("SELECT COUNT(*) FROM expense_tag WHERE tagId = :tagId")
     suspend fun countForTag(tagId: String): Int
+
+    @Query("DELETE FROM expense_tag WHERE expenseId = :expenseId AND tagId = :tagId")
+    suspend fun delete(expenseId: String, tagId: String)
 }

@@ -3,6 +3,7 @@ package br.com.paulodiogo.orcamento.data
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface TagDao {
@@ -14,6 +15,9 @@ interface TagDao {
 
     @Query("SELECT * FROM tag WHERE normalizedName = :normalizedName")
     suspend fun findByNormalizedName(normalizedName: String): TagEntity?
+
+    @Update
+    suspend fun update(tag: TagEntity)
 
     @Query("DELETE FROM tag WHERE id = :id")
     suspend fun deleteById(id: String)
