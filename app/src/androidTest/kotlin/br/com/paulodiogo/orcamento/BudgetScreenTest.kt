@@ -3,11 +3,17 @@ package br.com.paulodiogo.orcamento
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
 import br.com.paulodiogo.orcamento.domain.BudgetViewModel
+import br.com.paulodiogo.orcamento.domain.BudgetOperations
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -34,5 +40,20 @@ class BudgetScreenTest {
         composeRule.onNodeWithText("Orçamentos").assertTextContains("Orçamentos")
         composeRule.onNodeWithText("Abrir mês").assertTextContains("Abrir mês")
         composeRule.onNodeWithText("Nenhum mês configurado").assertTextContains("Nenhum mês configurado")
+    }
+
+    @Test
+    fun budgetDialogFormatsAndPersistsDigitInputAsCents() {
+        composeRule.setContent { BudgetScreen(viewModel) {} }
+        composeRule.onNodeWithText("Abrir mês").performClick()
+        val amountField = composeRule.onNodeWithTag("moneyTextField")
+        amountField.performTextInput("12345")
+        amountField.assertTextContains("123,45")
+        composeRule.onNodeWithText("Confirmar").performClick()
+        composeRule.waitUntil(5_000) {
+            runBlocking { BudgetOperations(database).findByMonth("2026-10")?.amountCents == 12_345L }
+        }
+
+        assertEquals(12_345L, runBlocking { BudgetOperations(database).findByMonth("2026-10")?.amountCents })
     }
 }

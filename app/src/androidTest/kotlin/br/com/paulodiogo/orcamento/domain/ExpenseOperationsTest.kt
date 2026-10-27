@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
 import br.com.paulodiogo.orcamento.data.ExpenseTagCrossRef
+import br.com.paulodiogo.orcamento.domain.parseMoneyDigitsToCents
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -89,5 +90,12 @@ class ExpenseOperationsTest {
 
         assertNotNull(operations.findById(created.id))
         assertEquals(500L, operations.findById(created.id)?.amountCents)
+    }
+
+    @Test
+    fun persistsCentDigitsAsExactExpenseCents() = runBlocking {
+        val expense = operations.create("Compra", parseMoneyDigitsToCents("12345"), "2026-10-27")
+
+        assertEquals(12_345L, operations.findById(expense.id)?.amountCents)
     }
 }

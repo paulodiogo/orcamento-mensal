@@ -14,35 +14,60 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import br.com.paulodiogo.orcamento.domain.InvalidMoneyInput
+import br.com.paulodiogo.orcamento.domain.DomainError
+import br.com.paulodiogo.orcamento.domain.moneyDigitsFromCents
+import br.com.paulodiogo.orcamento.domain.parseMoneyDigitsToCents
+import br.com.paulodiogo.orcamento.domain.validateExpenseAmount
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CreateExpenseDialog(
     tags: List<br.com.paulodiogo.orcamento.data.TagEntity>,
     initialDescription: String = "",
-    initialAmount: String = "",
+    initialAmountCents: Long? = null,
     initialOccurredOn: String = "",
     initialTagIds: Set<String> = emptySet(),
+    saving: Boolean = false,
     onDismiss: () -> Unit,
-    onSave: (String, String, String, List<String>) -> Unit,
+    onSave: (String, Long, String, List<String>) -> Unit,
 ) {
-    var description by remember { mutableStateOf(initialDescription) }
-    var amount by remember { mutableStateOf(initialAmount) }
-    var occurredOn by remember { mutableStateOf(initialOccurredOn) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var selectedTagIds by remember { mutableStateOf(initialTagIds) }
+    val emptyInputMessage = stringResource(R.string.money_field_no_digits)
+    val invalidInputMessage = stringResource(R.string.money_field_invalid)
+    val tooLargeMessage = stringResource(R.string.money_field_too_large)
+    val expenseAmountPositiveMessage = stringResource(R.string.expense_amount_positive)
+    val requiredFieldsMessage = stringResource(R.string.expense_required_fields)
+    val savingMessage = stringResource(R.string.save_in_progress)
+    val title = stringResource(if (initialAmountCents == null) R.string.expense_title_new else R.string.expense_title_edit)
+    val amountLabel = stringResource(R.string.money_field_label)
+    var description by rememberSaveable(initialDescription) { mutableStateOf(initialDescription) }
+    var amountDigits by rememberSaveable(initialAmountCents) {
+        mutableStateOf(initialAmountCents?.let(::moneyDigitsFromCents) ?: "")
+    }
+    var occurredOn by rememberSaveable(initialOccurredOn) { mutableStateOf(initialOccurredOn) }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var amountError by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedTagIds by rememberSaveable(initialTagIds) { mutableStateOf(initialTagIds) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Novo lançamento") },
+        title = { Text(title) },
         text = {
             Column {
                 OutlinedTextField(description, { description = it }, Modifier.fillMaxWidth(), label = { Text("Descrição") })
-                OutlinedTextField(amount, { amount = it }, Modifier.fillMaxWidth(), label = { Text("Valor") })
+                MoneyTextField(
+                    digits = amountDigits,
+                    onDigitsChange = { amountDigits = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = amountLabel,
+                    error = amountError,
+                    onInputError = { amountError = it },
+                )
                 OutlinedTextField(occurredOn, { occurredOn = it }, Modifier.fillMaxWidth(), label = { Text("Data (AAAA-MM-DD)") })
                 FlowRow {
                     tags.forEach { tag ->
@@ -63,11 +88,30 @@ fun CreateExpenseDialog(
             }
         },
         confirmButton = {
-            Button(onClick = {
-                if (description.isBlank() || amount.isBlank() || occurredOn.isBlank()) error = "Preencha todos os campos"
-                else onSave(description, amount, occurredOn, selectedTagIds.toList())
-            }) { Text("Salvar") }
+            Button(
+                enabled = !saving,
+                onClick = {
+                    if (description.isBlank() || amountDigits.isEmpty() || occurredOn.isBlank()) {
+                        if (amountDigits.isEmpty()) amountError = emptyInputMessage
+                        error = requiredFieldsMessage
+                    } else {
+                        try {
+                            val amountCents = parseMoneyDigitsToCents(amountDigits)
+                            validateExpenseAmount(amountCents)
+                            amountError = null
+                            error = null
+                            onSave(description, amountCents, occurredOn, selectedTagIds.toList())
+                        } catch (exception: InvalidMoneyInput) {
+                            amountError = exception.toDisplayMessage(emptyInputMessage, invalidInputMessage, tooLargeMessage)
+                        } catch (exception: DomainError.InvalidAmount) {
+                            amountError = expenseAmountPositiveMessage
+                        } catch (exception: IllegalArgumentException) {
+                            amountError = invalidInputMessage
+                        }
+                    }
+                },
+            ) { Text(if (saving) savingMessage else "Salvar") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
+        dismissButton = { TextButton(onClick = onDismiss, enabled = !saving) { Text("Cancelar") } },
     )
 }

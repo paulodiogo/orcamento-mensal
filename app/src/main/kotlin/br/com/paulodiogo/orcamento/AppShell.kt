@@ -63,6 +63,7 @@ fun AppShell(
     var showCreate by rememberSaveable { mutableStateOf(false) }
     val tags by expenses.tags.collectAsState()
     val editing by expenses.editing.collectAsState()
+    val expenseSaving by expenses.saving.collectAsState()
     val todayMonth = rememberSaveable { YearMonth.now().toString() }
 
     BudgetTheme {
@@ -93,13 +94,21 @@ fun AppShell(
     }
 
     if (showCreate) {
-        CreateExpenseDialog(tags = tags, onDismiss = { showCreate = false }, onSave = { description, amount, date, selectedTags ->
-            expenses.create(description, amount, date, selectedTags) { showCreate = false }
+        CreateExpenseDialog(tags = tags, saving = expenseSaving, onDismiss = { showCreate = false }, onSave = { description, amountCents, date, selectedTags ->
+            expenses.create(description, amountCents, date, selectedTags) { showCreate = false }
         })
     }
     editing?.let { (expense, selectedTags) ->
-        CreateExpenseDialog(tags, expense.description, java.math.BigDecimal.valueOf(expense.amountCents, 2).toPlainString(), expense.occurredOn, selectedTags, { expenses.clearEditing() }) { description, amount, date, tagIds ->
-            expenses.updateExpense(expense, description, amount, date, tagIds) { expenses.clearEditing() }
+        CreateExpenseDialog(
+            tags = tags,
+            initialDescription = expense.description,
+            initialAmountCents = expense.amountCents,
+            initialOccurredOn = expense.occurredOn,
+            initialTagIds = selectedTags,
+            saving = expenseSaving,
+            onDismiss = { expenses.clearEditing() },
+        ) { description, amountCents, date, tagIds ->
+            expenses.updateExpense(expense, description, amountCents, date, tagIds) { expenses.clearEditing() }
         }
     }
 }

@@ -80,6 +80,7 @@ private fun ExpenseListScreen(viewModel: ExpenseListViewModel, onReports: () -> 
     var rangeEnd by rememberSaveable { mutableStateOf("") }
     val tags by viewModel.tags.collectAsState()
     val editing by viewModel.editing.collectAsState()
+    val saving by viewModel.saving.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -174,9 +175,10 @@ private fun ExpenseListScreen(viewModel: ExpenseListViewModel, onReports: () -> 
     if (showCreateDialog) {
         CreateExpenseDialog(
             tags = tags,
+            saving = saving,
             onDismiss = { showCreateDialog = false },
-            onSave = { description, amount, date, tagIds ->
-                viewModel.create(description, amount, date, tagIds) { showCreateDialog = false }
+            onSave = { description, amountCents, date, tagIds ->
+                viewModel.create(description, amountCents, date, tagIds) { showCreateDialog = false }
             },
         )
     }
@@ -185,12 +187,13 @@ private fun ExpenseListScreen(viewModel: ExpenseListViewModel, onReports: () -> 
         CreateExpenseDialog(
             tags = tags,
             initialDescription = expense.description,
-            initialAmount = java.math.BigDecimal.valueOf(expense.amountCents, 2).toPlainString(),
+            initialAmountCents = expense.amountCents,
             initialOccurredOn = expense.occurredOn,
             initialTagIds = tagIds,
+            saving = saving,
             onDismiss = { viewModel.clearEditing() },
-            onSave = { description, amount, date, selectedTags ->
-                viewModel.updateExpense(expense, description, amount, date, selectedTags) { viewModel.clearEditing() }
+            onSave = { description, amountCents, date, selectedTags ->
+                viewModel.updateExpense(expense, description, amountCents, date, selectedTags) { viewModel.clearEditing() }
             },
         )
     }

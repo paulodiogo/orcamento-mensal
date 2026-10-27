@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import br.com.paulodiogo.orcamento.domain.BudgetOperations
+import br.com.paulodiogo.orcamento.domain.parseMoneyDigitsToCents
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -44,5 +45,14 @@ class BudgetOperationsTest {
         assertEquals(200L, operations.findByMonth("2026-10")?.amountCents)
         assertEquals(1, database.budgetDao().count())
         assertNull(operations.findByMonth("2026-11"))
+    }
+
+    @Test
+    fun acceptsZeroAndPersistsCentDigitsAsExactBudgetCents() = runBlocking {
+        operations.save("2026-10", parseMoneyDigitsToCents("0"), now = 1L)
+        assertEquals(0L, operations.findByMonth("2026-10")?.amountCents)
+
+        operations.save("2026-11", parseMoneyDigitsToCents("12345"), now = 2L)
+        assertEquals(12_345L, operations.findByMonth("2026-11")?.amountCents)
     }
 }

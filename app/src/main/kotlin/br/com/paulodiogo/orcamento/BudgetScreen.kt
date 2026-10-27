@@ -27,10 +27,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import br.com.paulodiogo.orcamento.domain.BudgetState
 import br.com.paulodiogo.orcamento.domain.BudgetViewModel
+import br.com.paulodiogo.orcamento.domain.InvalidMoneyInput
 import br.com.paulodiogo.orcamento.domain.MonthOpeningState
+import br.com.paulodiogo.orcamento.domain.parseMoneyDigitsToCents
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Locale
@@ -39,6 +42,7 @@ import java.util.Locale
 fun BudgetScreen(viewModel: BudgetViewModel, onBack: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val opening by viewModel.opening.collectAsState()
+    val saving by viewModel.saving.collectAsState()
     var month by rememberSaveable { mutableStateOf("2026-10") }
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Spacer(Modifier.height(12.dp))
@@ -71,12 +75,18 @@ fun BudgetScreen(viewModel: BudgetViewModel, onBack: () -> Unit) {
             }
         }
     }
-    opening?.let { stateValue -> MonthOpeningDialog(stateValue, viewModel) }
+    opening?.let { stateValue -> MonthOpeningDialog(stateValue, viewModel, saving) }
 }
 
 @Composable
-private fun MonthOpeningDialog(state: MonthOpeningState, viewModel: BudgetViewModel) {
-    var amount by rememberSaveable(state.month, state.suggested) { mutableStateOf(state.amount) }
+private fun MonthOpeningDialog(state: MonthOpeningState, viewModel: BudgetViewModel, saving: Boolean) {
+    val emptyInputMessage = stringResource(R.string.money_field_no_digits)
+    val invalidInputMessage = stringResource(R.string.money_field_invalid)
+    val tooLargeMessage = stringResource(R.string.money_field_too_large)
+    val amountLabel = stringResource(R.string.budget_amount_label)
+    val savingMessage = stringResource(R.string.save_in_progress)
+    var amountDigits by rememberSaveable(state.month, state.suggested) { mutableStateOf(state.amountDigits) }
+    var amountError by rememberSaveable(state.month) { mutableStateOf<String?>(null) }
     AlertDialog(
         onDismissRequest = viewModel::closeOpening,
         title = { Text("Abrir mês ${state.month}") },
@@ -87,12 +97,31 @@ private fun MonthOpeningDialog(state: MonthOpeningState, viewModel: BudgetViewMo
                     Text(formatCents(it), style = MaterialTheme.typography.headlineSmall)
                     Text("Revise o valor antes de confirmar.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                OutlinedTextField(amount, { amount = it }, label = { Text("Orçamento mensal") }, singleLine = true)
+                MoneyTextField(
+                    digits = amountDigits,
+                    onDigitsChange = { amountDigits = it },
+                    label = amountLabel,
+                    error = amountError,
+                    onInputError = { amountError = it },
+                )
                 state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
         },
-        confirmButton = { Button(onClick = { viewModel.saveMonth(state.month, amount) }) { Text("Confirmar") } },
-        dismissButton = { TextButton(onClick = viewModel::closeOpening) { Text("Cancelar") } },
+        confirmButton = {
+            Button(
+                enabled = !saving,
+                onClick = {
+                    try {
+                        val amountCents = parseMoneyDigitsToCents(amountDigits)
+                        amountError = null
+                        viewModel.saveMonth(state.month, amountCents)
+                    } catch (exception: InvalidMoneyInput) {
+                        amountError = exception.toDisplayMessage(emptyInputMessage, invalidInputMessage, tooLargeMessage)
+                    }
+                },
+            ) { Text(if (saving) savingMessage else "Confirmar") }
+        },
+        dismissButton = { TextButton(onClick = viewModel::closeOpening, enabled = !saving) { Text("Cancelar") } },
     )
 }
 

@@ -1,4 +1,10 @@
-﻿# Progresso
+# Progresso
+
+## Fase 11 — entrada monetária — implementada e validada localmente
+
+Implementados o formatador/conversor compartilhado e `MoneyTextField` para cadastro/edição de despesas e orçamento mensal. O campo utiliza dígitos com centavos implícitos, máscara brasileira, centavos `Long`, colagem sanitizada, cursor/seleção e teclado numérico; despesas continuam positivas e orçamento aceita zero. Não houve mudança no esquema Room, regras financeiras, dependências ou versões.
+
+Validação final: `testDebugUnitTest assembleDebug lintDebug` passou com 23 testes JVM; `connectedDebugAndroidTest` passou com 27 testes no `emulator-5554`; `git diff --check` passou. Inspeção real confirmou `123456` como `R$ 1.234,56` e `inputType=2`. A solicitação do IME foi verificada, embora a configuração do AVD não tenha exibido o keypad visual na captura. Registro detalhado em `docs/phases/phase-11-money-input/VALIDATION.md`.
 
 **Estado:** Fase 08 concluída; Fase 09 parcialmente concluída; Fase 10 parcialmente implementada e validada tecnicamente.
 
@@ -15,4 +21,3 @@ Fases 01–07 permanecem preservadas conforme histórico. A Fase 08 adicionou o 
 Validação final executada: 15 testes JVM efetivamente executados e 15 testes instrumentados no BUSAO (AVD) - 16, todos sem falhas, erros ou ignorados; `assembleDebug`, `lintDebug`, `assembleRelease` e `git diff --check` passaram. Não existe tarefa `ktlintCheck` configurada.
 
 A release foi compilada como `app-release-unsigned.apk`. Por decisão explícita, não existe configuração de assinatura e nenhuma chave/credencial foi inventada ou alterada. O APK debug foi instalado e iniciado no emulador; a UI exibiu `Lançamentos`, `Relatórios`, `Orçamentos` e `Nenhum lançamento`, sem `FATAL EXCEPTION` do aplicativo. A versão 1.0 está tecnicamente validada localmente, mas não é distribuível como APK assinado.
-

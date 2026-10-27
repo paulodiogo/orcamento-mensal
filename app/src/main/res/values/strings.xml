@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Orçamento Mensal</string>
+    <string name="money_field_prefix">R$</string>
+    <string name="money_field_label">Valor</string>
+    <string name="money_field_no_digits">Digite ou cole pelo menos um algarismo.</string>
+    <string name="money_field_invalid">Use somente algarismos para informar o valor.</string>
+    <string name="money_field_too_large">O valor excede o limite permitido.</string>
+    <string name="budget_amount_label">Orçamento mensal</string>
+    <string name="expense_title_new">Novo lançamento</string>
+    <string name="expense_title_edit">Editar lançamento</string>
+    <string name="expense_required_fields">Preencha todos os campos</string>
+    <string name="expense_amount_positive">O valor da despesa deve ser maior que zero.</string>
+    <string name="save_in_progress">Salvando...</string>
 </resources>

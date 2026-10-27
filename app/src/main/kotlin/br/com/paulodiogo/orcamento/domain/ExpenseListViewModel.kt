@@ -34,6 +34,8 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
     val tags: StateFlow<List<TagEntity>> = _tags.asStateFlow()
     private val _editing = MutableStateFlow<Pair<ExpenseEntity, Set<String>>?>(null)
     val editing: StateFlow<Pair<ExpenseEntity, Set<String>>?> = _editing.asStateFlow()
+    private val _saving = MutableStateFlow(false)
+    val saving: StateFlow<Boolean> = _saving.asStateFlow()
 
     private var currentQuery = ""
     private var currentMonth: String? = null
@@ -93,28 +95,40 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
         _editing.value = null
     }
 
-    fun create(description: String, amount: String, occurredOn: String, tagIds: List<String> = emptyList(), onComplete: () -> Unit = {}) {
+    fun create(description: String, amountCents: Long, occurredOn: String, tagIds: List<String> = emptyList(), onComplete: () -> Unit = {}) {
+        if (_saving.value) return
+        _saving.value = true
         viewModelScope.launch {
-            runCatching { operations.create(description, parseAmountCents(amount), occurredOn, tagIds = tagIds) }
-                .onSuccess { onComplete(); refresh(); refreshTags() }
-                .onFailure { error -> _state.value = ExpenseListState.Error(error.message ?: "Não foi possível salvar o lançamento") }
+            try {
+                runCatching { operations.create(description, amountCents, occurredOn, tagIds = tagIds) }
+                    .onSuccess { onComplete(); refresh(); refreshTags() }
+                    .onFailure { error -> _state.value = ExpenseListState.Error(error.message ?: "Não foi possível salvar o lançamento") }
+            } finally {
+                _saving.value = false
+            }
         }
     }
 
     fun updateExpense(
         expense: ExpenseEntity,
         description: String,
-        amount: String,
+        amountCents: Long,
         occurredOn: String,
         tagIds: List<String>,
         onComplete: () -> Unit = {},
     ) {
+        if (_saving.value) return
+        _saving.value = true
         viewModelScope.launch {
-            runCatching {
-                operations.update(expense, description, parseAmountCents(amount), occurredOn)
-                operations.updateTags(expense.id, tagIds)
-            }.onSuccess { onComplete(); refresh() }
-                .onFailure { error -> _state.value = ExpenseListState.Error(error.message ?: "Não foi possível atualizar o lançamento") }
+            try {
+                runCatching {
+                    operations.update(expense, description, amountCents, occurredOn)
+                    operations.updateTags(expense.id, tagIds)
+                }.onSuccess { onComplete(); refresh() }
+                    .onFailure { error -> _state.value = ExpenseListState.Error(error.message ?: "Não foi possível atualizar o lançamento") }
+            } finally {
+                _saving.value = false
+            }
         }
     }
 
