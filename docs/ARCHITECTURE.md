@@ -14,7 +14,7 @@ flowchart LR
 
 | Camada | Responsabilidade |
 |---|---|
-| UI | Exibir `UiState`, acessibilidade, coletar entradas e navegar; não calcular totais. |
+| UI | Exibir `UiState`, coletar entradas e navegar; não calcular totais. |
 | ViewModel | Estado, eventos, coroutines, carregamento/erro/vazio. |
 | Casos de uso | Aplicar RN-001 a RN-012, validações e transações. |
 | Repositórios | Contrato de dados e mapeamento domínio/persistência. |

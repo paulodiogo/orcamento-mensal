@@ -10,7 +10,7 @@ A fonte detalhada é [FUNCTIONAL_SPECIFICATION.md](FUNCTIONAL_SPECIFICATION.md).
 | RNF-003 | Representar valores em centavos inteiros, sem `Float`/`Double` em cálculos. |
 | RNF-004 | Preservar integridade por chaves estrangeiras, unicidades e transações. |
 | RNF-005 | Suportar ao menos 10.000 lançamentos com paginação/consultas indexadas sem bloqueio perceptível da interface. |
-| RNF-006 | Suportar tema claro/escuro, leitores de tela e escala de fonte do sistema. |
+| RNF-006 | Suportar tema claro/escuro e estados funcionais consistentes da interface. |
 | RNF-007 | Não transmitir dados financeiros; não declarar permissões de rede. |
 | RNF-008 | Possuir estados de carregamento, vazio, erro recuperável e sucesso. |
 | RNF-009 | Prever migrações Room versionadas e testadas antes de evolução de esquema. |

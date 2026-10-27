@@ -12,8 +12,6 @@
 | Histórico | Listar meses com orçamento, gasto e saldo. | Sem meses: orientar a criar orçamento. |
 | Configurações | Apenas informações de privacidade/offline e versão. | Sem opções de backup ou rede na v1. |
 
-Todos os controles têm rótulos semânticos, área de toque adequada, contraste Material 3, suporte a escala de fonte e não usam cor como único indicador.
-
 ```mermaid
 flowchart TD
  R[Resumo] --> L[Lista]

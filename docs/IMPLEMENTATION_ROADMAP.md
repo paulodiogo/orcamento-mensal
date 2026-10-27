@@ -10,7 +10,7 @@
 | 05 | Lançamentos | 04 | CRUD, filtros e testes integrados. |
 | 06 | Resumo e relatórios | 05 | Totais únicos e agrupamentos por tag testados. |
 | 07 | Meses e histórico | 06 | Abertura explícita, sugestão/histórico testados. |
-| 08 | Qualidade UX | 07 | Acessibilidade, erros e refinamento validados. |
+| 08 | Qualidade UX | 07 | Erros, estados vazios e refinamento validados. |
 | 09 | Validação final | 08 | Suite prevista, revisão e preparação de distribuição. |
 
 Cada fase requer autorização explícita após sua conclusão. Consulte os documentos em `phases/` para escopo, tarefas, aceite e estado.

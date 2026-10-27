@@ -14,6 +14,19 @@ fun validateExpenseAmount(amountCents: Long) {
     if (amountCents <= 0L) throw DomainError.InvalidAmount
 }
 
+fun parseAmountCents(input: String): Long {
+    val normalized = input.trim().replace(',', '.')
+    return try {
+        java.math.BigDecimal(normalized)
+            .setScale(2, java.math.RoundingMode.UNNECESSARY)
+            .movePointRight(2)
+            .longValueExact()
+            .also(::validateExpenseAmount)
+    } catch (_: Exception) {
+        throw DomainError.InvalidAmount
+    }
+}
+
 fun validateBudgetAmount(amountCents: Long) {
     if (amountCents < 0L) throw DomainError.NegativeBudget
 }
