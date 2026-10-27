@@ -48,10 +48,6 @@ fun BudgetScreen(viewModel: BudgetViewModel, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Spacer(Modifier.height(12.dp))
         ScreenTitle("Orçamentos", "Planeje cada mês sem misturar seus dados")
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Consultar outro mês", style = MaterialTheme.typography.labelLarge)
-            TextButton(onClick = onBack) { Text("Lançamentos") }
-        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MonthField(value = month, onValueChange = { month = it }, modifier = Modifier.weight(1f), label = "Mês")
             Button(onClick = { viewModel.openMonth(month) }) { Text("Abrir mês") }
