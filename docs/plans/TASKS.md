@@ -1,6 +1,6 @@
 ﻿# Tarefas de Planejamento
 
-- **Fase atual:** 00 — Planejamento.
-- **Tarefa concluída documentalmente:** produzir e consolidar especificação, roteiro e decisões de produto.
-- **Próxima tarefa autorizável:** revisão e aprovação formal do planejamento; nenhuma tarefa de implementação está autorizada.
+- **Fase atual:** 03 — Regras de negócio concluída.
+- **Tarefas concluídas:** planejamento, fundações, persistência Room e domínio financeiro/validações.
+- **Próxima tarefa autorizável:** revisão e autorização explícita da Fase 04; não iniciar automaticamente.
 
