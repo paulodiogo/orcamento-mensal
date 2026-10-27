@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TagDao {
@@ -15,6 +16,9 @@ interface TagDao {
 
     @Query("SELECT * FROM tag WHERE normalizedName = :normalizedName")
     suspend fun findByNormalizedName(normalizedName: String): TagEntity?
+
+    @Query("SELECT * FROM tag ORDER BY normalizedName")
+    fun observeAll(): Flow<List<TagEntity>>
 
     @Query("SELECT * FROM tag ORDER BY normalizedName")
     suspend fun findAll(): List<TagEntity>

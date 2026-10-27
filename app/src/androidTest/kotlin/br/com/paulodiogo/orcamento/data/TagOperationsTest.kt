@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import br.com.paulodiogo.orcamento.domain.DomainError
 import br.com.paulodiogo.orcamento.domain.TagOperations
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -39,6 +40,13 @@ class TagOperationsTest {
         assertEquals(first.id, second.id)
         assertEquals("Mercado Semanal", first.name)
         assertEquals(1, database.tagDao().count())
+    }
+
+    @Test
+    fun createdTagAppearsInReactiveQuery() = runBlocking {
+        val created = operations.createOrReuse("Recente")
+
+        assertEquals(listOf(created.id), database.tagDao().observeAll().first().map { it.id })
     }
 
     @Test

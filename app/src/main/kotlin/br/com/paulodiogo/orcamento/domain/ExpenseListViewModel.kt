@@ -9,6 +9,7 @@ import br.com.paulodiogo.orcamento.data.TagEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -38,6 +39,7 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
     val editing: StateFlow<Pair<ExpenseEntity, Set<String>>?> = _editing.asStateFlow()
     private val _saving = MutableStateFlow(false)
     val saving: StateFlow<Boolean> = _saving.asStateFlow()
+    private var currentExpenses: List<ExpenseEntity> = emptyList()
 
     private var currentQuery = ""
     private var currentMonth: String? = null
@@ -50,10 +52,20 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
         database.expenseDao().observeAll()
             .onEach { expenses -> publish(expenses) }
             .launchIn(viewModelScope)
-        refreshTags()
+        database.tagDao().observeAll()
+            .onEach { tags ->
+                _tags.value = tags
+                currentTagId?.let { selected ->
+                    if (tags.none { it.id == selected }) currentTagId = null
+                }
+                publish(currentExpenses)
+            }
+            .catch { _state.value = ExpenseListState.Error(it.message ?: "Não foi possível carregar as tags") }
+            .launchIn(viewModelScope)
     }
 
     private suspend fun publish(expenses: List<ExpenseEntity>) {
+        currentExpenses = expenses
         runCatching {
             val relations = expenses.associate { expense ->
                 expense.id to database.expenseTagDao().findTagIdsForExpense(expense.id).toSet()
@@ -72,12 +84,6 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
             _state.value = if (filtered.isEmpty()) ExpenseListState.Empty else ExpenseListState.Content(filtered)
         }.onFailure { error ->
             _state.value = ExpenseListState.Error(error.message ?: "Não foi possível carregar os lançamentos")
-        }
-    }
-
-    fun refreshTags() {
-        viewModelScope.launch {
-            _tags.value = database.tagDao().findAll()
         }
     }
 
@@ -119,7 +125,7 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
         viewModelScope.launch {
             try {
                 runCatching { operations.create(description, amountCents, occurredOn, tagIds = tagIds) }
-                    .onSuccess { onComplete(); refresh(); refreshTags() }
+                    .onSuccess { onComplete(); refresh() }
                     .onFailure { error -> _state.value = ExpenseListState.Error(error.message ?: "Não foi possível salvar o lançamento") }
             } finally {
                 _saving.value = false

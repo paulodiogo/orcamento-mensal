@@ -8,6 +8,9 @@ import br.com.paulodiogo.orcamento.data.TagEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 sealed interface TagState {
@@ -22,14 +25,15 @@ class TagViewModel(private val database: BudgetDatabase) : ViewModel() {
     private val _state = MutableStateFlow<TagState>(TagState.Loading)
     val state: StateFlow<TagState> = _state.asStateFlow()
 
-    init { refresh() }
+    init {
+        database.tagDao().observeAll()
+            .onEach { tags -> _state.value = if (tags.isEmpty()) TagState.Empty else TagState.Content(tags) }
+            .catch { _state.value = TagState.Error(it.message ?: "Não foi possível carregar as tags") }
+            .launchIn(viewModelScope)
+    }
 
     fun refresh() {
-        viewModelScope.launch {
-            runCatching { database.tagDao().findAll() }
-                .onSuccess { tags -> _state.value = if (tags.isEmpty()) TagState.Empty else TagState.Content(tags) }
-                .onFailure { _state.value = TagState.Error(it.message ?: "Não foi possível carregar as tags") }
-        }
+        // Kept for callers that explicitly request a refresh; the Room flow is authoritative.
     }
 
     fun save(name: String, editingId: String? = null, onComplete: () -> Unit = {}) {

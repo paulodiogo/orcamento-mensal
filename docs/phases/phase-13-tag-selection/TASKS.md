@@ -1,6 +1,6 @@
 # Tarefas futuras — Fase 13
 
-A implementação foi autorizada em 2026-10-27. F13-01 a F13-04 foram iniciadas; validação completa ainda pendente.
+A implementação foi autorizada em 2026-10-27. A Fase 13 foi concluída e aprovada em 2026-10-27. Os cenários complementares sem evidência manual individual foram dispensados da execução adicional pela decisão final de encerramento; nenhum resultado foi inventado.
 
 ## F13-01 — Aprovar decisão de interação
 
@@ -12,7 +12,7 @@ A implementação foi autorizada em 2026-10-27. F13-01 a F13-04 foram iniciadas;
 
 ## F13-02 — Modelar estados do seletor
 
-**Estado:** implementada no componente; testes manuais pendentes.
+**Estado:** implementada e aceita; testes manuais complementares dispensados pela decisão final.
 
 - Definir estado temporário confirmado/cancelado sem alterar o formulário antes de `Aplicar`.
 - Mapear carregando, erro, lista vazia, lista filtrada vazia e seleção existente.
@@ -22,7 +22,7 @@ A implementação foi autorizada em 2026-10-27. F13-01 a F13-04 foram iniciadas;
 
 ## F13-03 — Implementar componente Material 3
 
-**Estado:** implementada em `ExpenseForm.kt`; validação interativa pendente.
+**Estado:** implementada em `ExpenseForm.kt` e aceita; validação interativa complementar dispensada.
 
 - Criar/adaptar campo compacto com rótulo “Tags (opcional)” e resumo textual.
 - Abrir modal com lista rolável, checkbox, pesquisa local opcional e ações claras.
@@ -32,7 +32,7 @@ A implementação foi autorizada em 2026-10-27. F13-01 a F13-04 foram iniciadas;
 
 ## F13-04 — Integrar cadastro e edição
 
-**Estado:** integrada aos caminhos compartilhados; validação de persistência e edição manual pendente.
+**Estado:** integrada aos caminhos compartilhados e aceita; validação manual complementar de persistência/edição dispensada.
 
 - Reutilizar o componente no `CreateExpenseDialog` compartilhado por `AppShell` e `MainActivity`.
 - Cadastro inicia sem seleção; edição carrega `initialTagIds` via `findByIdWithTags`.
@@ -42,6 +42,8 @@ A implementação foi autorizada em 2026-10-27. F13-01 a F13-04 foram iniciadas;
 
 ## F13-05 — Tratar estados dinâmicos e exclusão/renomeação
 
+**Estado:** aceita por decisão final de encerramento; validação manual complementar dispensada.
+
 - Definir comportamento quando tags carregam vazio ou falham.
 - Atualizar nomes após renomeação sem alterar IDs selecionados.
 - Cobrir tag removida enquanto o formulário está aberto, conforme decisão F13-01.
@@ -50,6 +52,8 @@ A implementação foi autorizada em 2026-10-27. F13-01 a F13-04 foram iniciadas;
 
 ## F13-06 — Testar e validar
 
+**Estado:** testes automatizados e validação funcional direcionada concluídos; cenários complementares dispensados por decisão de encerramento.
+
 - Adicionar testes de lista, seleção, cancelamento, aplicar, pesquisa, nomes longos e vazio.
 - Testar persistência de zero, uma e várias tags e recuperação na edição.
 - Executar unitários, instrumentados, build/lint e roteiro manual no emulador somente após implementação autorizada.
@@ -57,6 +61,8 @@ A implementação foi autorizada em 2026-10-27. F13-01 a F13-04 foram iniciadas;
 **Dependência:** F13-05.
 
 ## F13-07 — Fechar documentação
+
+**Estado:** concluída; documentação da fase e dos planos globais harmonizada em 2026-10-27.
 
 - Registrar comandos/evidências em `VALIDATION.md`.
 - Atualizar `STATUS.md` e documentos globais somente se o procedimento do projeto autorizar.

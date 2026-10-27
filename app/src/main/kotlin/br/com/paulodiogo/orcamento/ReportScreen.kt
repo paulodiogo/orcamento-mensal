@@ -44,10 +44,6 @@ fun ReportScreen(viewModel: ReportViewModel, onBack: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ScreenTitle("Relatórios", "Entenda para onde seu dinheiro está indo")
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Período analisado", style = MaterialTheme.typography.labelLarge)
-            TextButton(onClick = onBack) { Text("Lançamentos") }
-        }
         MonthField(value = month, onValueChange = { month = it }, modifier = Modifier.fillMaxWidth(), label = "Mês")
         when (val current = state) {
             ReportState.Idle, ReportState.Loading -> CircularProgressIndicator()

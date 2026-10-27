@@ -1,5 +1,9 @@
 # Escopo — Fase 13
 
+## Estado documental
+
+O escopo abaixo permanece preservado. A Fase 13 foi encerrada e aprovada por decisão final em 2026-10-27. Critérios complementares sem validação manual individual foram formalmente dispensados de nova verificação; isso não constitui evidência de execução desses cenários.
+
 ## Incluído
 
 - Redesenhar apenas a apresentação e o fluxo de seleção de tags no formulário compartilhado de criação/edição.

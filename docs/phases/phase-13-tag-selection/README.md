@@ -2,7 +2,7 @@
 
 ## Estado
 
-Planejamento concluído; nenhuma implementação autorizada ou realizada.
+**Fase concluída e aprovada em 2026-10-27.** A implementação autorizada foi realizada e a atualização reativa das tags foi validada no BUSAO. Os critérios complementares sem evidência manual individual foram aceitos administrativamente pela decisão final de encerramento, sem nova execução de testes.
 
 ## Objetivo e contexto
 
@@ -31,7 +31,7 @@ Essa solução reduz toques acidentais e preserva múltipla seleção, funciona 
 1. Preservar o modelo múltiplo e a persistência existentes.
 2. Usar modal Material 3 com confirmação explícita, não dropdown singular.
 3. Adicionar pesquisa no modal desde que a implementação permaneça local e sem dependência nova; para poucas tags o campo pode ser discreto, mas a lista deve continuar utilizável sem pesquisa.
-4. Tratar tags removidas durante a edição como associações obsoletas: não exibi-las como opção disponível e, antes de salvar, impedir associação inválida ou exigir limpeza explícita; a política final está pendente.
+4. Tratar tags removidas durante a edição como associações obsoletas: não exibi-las como opção disponível e, antes de salvar, impedir associação inválida ou exigir limpeza explícita; a política aplicada foi aceita no encerramento da fase.
 5. Não alterar Room, entidades, ViewModels, contratos ou regras nesta fase.
 
 ## Referências

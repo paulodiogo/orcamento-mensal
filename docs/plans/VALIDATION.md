@@ -1,6 +1,6 @@
 ﻿# Registro de Validação
 
-## Fase 13 — 2026-10-27 — seleção de tags
+## Fase 13 — 2026-10-27 — seleção de tags — concluída e aprovada
 
 - `rtk .\gradlew.bat testDebugUnitTest` — sucesso.
 - `rtk .\gradlew.bat assembleDebug` — sucesso.
@@ -12,7 +12,7 @@
 - `adb reboot` foi executado sem limpar dados. Após reinício, `MainActivity` renderizou; `uiautomator dump` identificou a árvore Compose, formulário, modal, campo de pesquisa, tag disponível e ações. A pesquisa `zzzzz` exibiu `Nenhuma tag corresponde à pesquisa.`.
 - Logs não apresentaram exceção não tratada do aplicativo, Compose, Room ou SQLite. A evidência aponta falha transitória de renderização/UiAutomation do emulador, recuperada pelo reboot, sem correção de código.
 
-A Fase 13 permanece aberta para concluir os cenários manuais de persistência, edição, cancelamento, múltiplas tags, lista vazia, remoção/renomeação e temas.
+A Fase 13 foi encerrada e aprovada por decisão administrativa final. Os cenários complementares sem evidência manual individual foram dispensados de novas verificações; essa dispensa não representa execução desses cenários.
 
 ## Correção de sincronização após criação de despesa — 2026-10-27
 
