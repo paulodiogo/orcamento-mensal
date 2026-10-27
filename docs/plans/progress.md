@@ -1,6 +1,10 @@
 ﻿# Progresso
 
-**Estado:** Fase 04 concluída. Foram implementadas as operações de tags globais planas: criação/reutilização, normalização, renomeação, associação e exclusão transacional. `connectedDebugAndroidTest` executou no BUSAO com 10 testes, 0 falhas e 0 erros; `assembleDebug` e `lintDebug` passaram. Fase 05 não iniciada.
+**Estado:** Fase 08 concluída; Fase 09 parcialmente concluída.
 
-**Execução atual:** as Etapas 1 e 2 da Fase 05 foram concluídas e validadas. As funcionalidades previstas da Etapa 3 foram implementadas e os testes instrumentados, incluindo Compose, passaram. A Etapa 4 foi validada parcialmente: testes, build, lint e inicialização no emulador passaram; a navegação manual completa não foi executada.
+Fases 01–07 permanecem preservadas conforme histórico. A Fase 08 adicionou o fluxo de abertura/edição de mês, sugestão do orçamento anterior, histórico mensal, estado vazio e tema claro/escuro do sistema. Testes instrumentados específicos cobrem isolamento e sugestão de orçamento.
+
+Validação final executada: 15 testes JVM efetivamente executados e 15 testes instrumentados no BUSAO (AVD) - 16, todos sem falhas, erros ou ignorados; `assembleDebug`, `lintDebug`, `assembleRelease` e `git diff --check` passaram. Não existe tarefa `ktlintCheck` configurada.
+
+A release foi compilada como `app-release-unsigned.apk`. Por decisão explícita, não existe configuração de assinatura e nenhuma chave/credencial foi inventada ou alterada. O APK debug foi instalado e iniciado no emulador; a UI exibiu `Lançamentos`, `Relatórios`, `Orçamentos` e `Nenhum lançamento`, sem `FATAL EXCEPTION` do aplicativo. A versão 1.0 está tecnicamente validada localmente, mas não é distribuível como APK assinado.
 

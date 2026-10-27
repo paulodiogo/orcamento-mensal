@@ -1,5 +1,8 @@
 package br.com.paulodiogo.orcamento.domain
 
+import java.math.BigDecimal
+import java.math.RoundingMode
+
 data class TagTotal(
     val normalizedName: String,
     val amountCents: Long,
@@ -9,6 +12,36 @@ data class MonthlyTotals(
     val totalSpentCents: Long,
     val availableCents: Long,
 )
+
+data class BudgetExecution(
+    val spentCents: Long,
+    val budgetCents: Long,
+    val availableCents: Long,
+    val percentage: BigDecimal?,
+)
+
+fun calculateBudgetExecution(
+    budgetCents: Long,
+    spentCents: Long,
+    percentageScale: Int = 2,
+): BudgetExecution {
+    validateBudgetAmount(budgetCents)
+    if (spentCents < 0L) throw DomainError.InvalidSpentAmount
+    if (percentageScale < 0) throw IllegalArgumentException("Percentage scale cannot be negative")
+    val availableCents = try {
+        Math.subtractExact(budgetCents, spentCents)
+    } catch (_: ArithmeticException) {
+        throw DomainError.ArithmeticOverflow
+    }
+    val percentage = if (budgetCents == 0L) {
+        null
+    } else {
+        BigDecimal.valueOf(spentCents)
+            .multiply(BigDecimal.valueOf(100L))
+            .divide(BigDecimal.valueOf(budgetCents), percentageScale, RoundingMode.HALF_UP)
+    }
+    return BudgetExecution(spentCents, budgetCents, availableCents, percentage)
+}
 
 fun calculateMonthlyTotals(budgetCents: Long, expenseAmountsCents: Iterable<Long>): MonthlyTotals {
     validateBudgetAmount(budgetCents)

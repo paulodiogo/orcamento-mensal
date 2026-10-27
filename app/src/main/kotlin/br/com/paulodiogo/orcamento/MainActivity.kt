@@ -17,6 +17,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -36,18 +39,32 @@ import androidx.compose.ui.unit.dp
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
 import br.com.paulodiogo.orcamento.domain.ExpenseListState
 import br.com.paulodiogo.orcamento.domain.ExpenseListViewModel
+import br.com.paulodiogo.orcamento.domain.ReportViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: ExpenseListViewModel by viewModels {
         ExpenseListViewModel.Factory(BudgetDatabase.getInstance(applicationContext))
     }
+    private val reportViewModel: ReportViewModel by viewModels {
+        ReportViewModel.Factory(BudgetDatabase.getInstance(applicationContext))
+    }
+    private val budgetViewModel: br.com.paulodiogo.orcamento.domain.BudgetViewModel by viewModels {
+        br.com.paulodiogo.orcamento.domain.BudgetViewModel.Factory(BudgetDatabase.getInstance(applicationContext))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            val darkTheme = isSystemInDarkTheme()
+            MaterialTheme(colorScheme = if (darkTheme) darkColorScheme() else lightColorScheme()) {
                 Surface {
-                    ExpenseListScreen(viewModel)
+                    var showReports by rememberSaveable { mutableStateOf(false) }
+                    var showBudgets by rememberSaveable { mutableStateOf(false) }
+                    when {
+                        showReports -> ReportScreen(reportViewModel) { showReports = false }
+                        showBudgets -> BudgetScreen(budgetViewModel) { showBudgets = false }
+                        else -> ExpenseListScreen(viewModel, onReports = { showReports = true }, onBudgets = { showBudgets = true })
+                    }
                 }
             }
         }
@@ -56,7 +73,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ExpenseListScreen(viewModel: ExpenseListViewModel) {
+private fun ExpenseListScreen(viewModel: ExpenseListViewModel, onReports: () -> Unit, onBudgets: () -> Unit) {
     val state by viewModel.state.collectAsState()
     var query by rememberSaveable { mutableStateOf("") }
     var showDeleteDialog by rememberSaveable { mutableStateOf<String?>(null) }
@@ -78,7 +95,13 @@ private fun ExpenseListScreen(viewModel: ExpenseListViewModel) {
         modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("Lançamentos", style = MaterialTheme.typography.headlineSmall)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Lançamentos", style = MaterialTheme.typography.headlineSmall)
+            Row {
+                TextButton(onClick = onReports) { Text("Relatórios") }
+                TextButton(onClick = onBudgets) { Text("Orçamentos") }
+            }
+        }
         OutlinedTextField(
             value = query,
             onValueChange = { query = it; viewModel.refresh(query = it, tagId = selectedTagId, withoutTag = withoutTag) },

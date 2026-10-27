@@ -8,6 +8,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,6 +42,49 @@ class BudgetDatabaseTest {
         } catch (_: Exception) {
             // Expected Room primary-key constraint.
         }
+    }
+
+    @Test
+    fun aggregatesExpensesByPeriodMonthAndTagWithoutDuplicatingMultitagTotals() {
+        val casa = TagEntity("tag-casa", "Casa", "casa", 1L, 1L)
+        val mercado = TagEntity("tag-mercado", "Mercado", "mercado", 1L, 1L)
+        val first = ExpenseEntity("expense-1", "Compra", 1_000L, "2026-10-01", 1L, 1L)
+        val second = ExpenseEntity("expense-2", "Contas", 2_000L, "2026-10-31", 1L, 1L)
+        val outside = ExpenseEntity("expense-3", "Fora", 4_000L, "2026-11-01", 1L, 1L)
+        runDatabase {
+            tagDao().insert(casa)
+            tagDao().insert(mercado)
+            expenseDao().insert(first)
+            expenseDao().insert(second)
+            expenseDao().insert(outside)
+            expenseTagDao().insertAll(
+                listOf(
+                    ExpenseTagCrossRef(first.id, casa.id),
+                    ExpenseTagCrossRef(first.id, mercado.id),
+                    ExpenseTagCrossRef(second.id, casa.id),
+                ),
+            )
+        }
+
+        assertEquals(3_000L, runDatabase { expenseDao().sumAmountBetween("2026-10-01", "2026-10-31") })
+        assertEquals(2, runDatabase { expenseDao().countBetween("2026-10-01", "2026-10-31") })
+        assertEquals(
+            listOf(
+                MonthlyExpenseTotal("2026-10", 3_000L),
+            ),
+            runDatabase { expenseDao().sumAmountByMonthBetween("2026-10-01", "2026-10-31") },
+        )
+        assertEquals(
+            listOf(
+                TagExpenseTotal(casa.id, casa.name, 3_000L),
+                TagExpenseTotal(mercado.id, mercado.name, 1_000L),
+            ),
+            runDatabase { expenseDao().sumAmountByTagBetween("2026-10-01", "2026-10-31") },
+        )
+        assertEquals(0L, runDatabase { expenseDao().sumAmountBetween("2027-01-01", "2027-01-31") })
+        assertEquals(0, runDatabase { expenseDao().countBetween("2027-01-01", "2027-01-31") })
+        assertTrue(runDatabase { expenseDao().sumAmountByMonthBetween("2027-01-01", "2027-01-31") }.isEmpty())
+        assertTrue(runDatabase { expenseDao().sumAmountByTagBetween("2027-01-01", "2027-01-31") }.isEmpty())
     }
 
     @Test

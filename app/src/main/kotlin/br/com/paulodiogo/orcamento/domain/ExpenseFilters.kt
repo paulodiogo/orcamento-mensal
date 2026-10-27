@@ -2,6 +2,14 @@ package br.com.paulodiogo.orcamento.domain
 
 import br.com.paulodiogo.orcamento.data.ExpenseEntity
 
+fun validateDateRange(startDate: String?, endDate: String?) {
+    startDate?.let(::validateOccurredOn)
+    endDate?.let(::validateOccurredOn)
+    if (startDate != null && endDate != null && startDate > endDate) {
+        throw DomainError.InvalidDateRange
+    }
+}
+
 fun filterExpenses(
     expenses: List<ExpenseEntity>,
     query: String = "",

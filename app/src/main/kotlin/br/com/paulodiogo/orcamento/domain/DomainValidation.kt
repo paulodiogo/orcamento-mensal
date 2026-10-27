@@ -2,10 +2,12 @@ package br.com.paulodiogo.orcamento.domain
 
 sealed class DomainError(message: String) : IllegalArgumentException(message) {
     data object InvalidAmount : DomainError("Amount must be greater than zero")
+    data object InvalidSpentAmount : DomainError("Spent amount cannot be negative")
     data object NegativeBudget : DomainError("Budget cannot be negative")
     data object EmptyDescription : DomainError("Description cannot be empty")
     data object EmptyTagName : DomainError("Tag name cannot be empty")
     data object InvalidDate : DomainError("Occurrence date must use yyyy-MM-dd")
+    data object InvalidDateRange : DomainError("Date range start cannot be after end")
     data object ArithmeticOverflow : DomainError("Financial calculation overflow")
     data object DuplicateTag : DomainError("Tag already exists")
 }
@@ -42,3 +44,7 @@ fun validateOccurredOn(occurredOn: String): String =
     }
 
 private val DATE_PATTERN = Regex("\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])")
+
+fun validateMonth(month: String): String = month.trim().also {
+    if (!Regex("\\d{4}-(0[1-9]|1[0-2])").matches(it)) throw DomainError.InvalidDate
+}
