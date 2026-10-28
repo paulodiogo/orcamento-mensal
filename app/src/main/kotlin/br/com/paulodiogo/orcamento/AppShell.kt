@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -31,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.FilterChip
@@ -44,11 +48,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -59,6 +65,7 @@ import br.com.paulodiogo.orcamento.data.LocalBackupManager
 import br.com.paulodiogo.orcamento.data.TagEntity
 import br.com.paulodiogo.orcamento.domain.BudgetState
 import br.com.paulodiogo.orcamento.domain.BudgetViewModel
+import br.com.paulodiogo.orcamento.domain.ExpenseListItem
 import br.com.paulodiogo.orcamento.domain.ExpenseListState
 import br.com.paulodiogo.orcamento.domain.ExpenseListViewModel
 import br.com.paulodiogo.orcamento.domain.ReportState
@@ -384,15 +391,99 @@ private fun ExpenseHistoryScreen(viewModel: ExpenseListViewModel, tags: List<Tag
             ExpenseListState.Empty -> EmptyState(if (query.isBlank()) "Nenhum lançamento ainda" else "Nenhum resultado", "Use o botão + para registrar uma despesa ou receita.")
             is ExpenseListState.Error -> Text(current.message, color = MaterialTheme.colorScheme.error)
             is ExpenseListState.Content -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(current.expenses, key = { it.id }) { expense ->
-                    SummaryCard(expense.description, formatBrazilianCents(expense.amountCents), expense.occurredOn, Modifier.fillMaxWidth())
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { viewModel.edit(expense.id) }) { Text("Editar") }
-                        TextButton(onClick = { deleteId = expense.id }) { Text("Excluir") }
-                    }
+                items(current.items, key = { it.expense.id }) { item ->
+                    ExpenseHistoryCard(
+                        item = item,
+                        onEdit = { viewModel.edit(item.expense.id) },
+                        onDelete = { deleteId = item.expense.id },
+                    )
                 }
             }
         }
     }
     deleteId?.let { id -> AlertDialog(onDismissRequest = { deleteId = null }, title = { Text("Excluir lançamento?") }, text = { Text("Essa ação não pode ser desfeita.") }, confirmButton = { Button(onClick = { viewModel.delete(id); deleteId = null }) { Text("Excluir") } }, dismissButton = { TextButton({ deleteId = null }) { Text("Cancelar") } }) }
+}
+
+@Composable
+private fun ExpenseHistoryCard(
+    item: ExpenseListItem,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val expense = item.expense
+    val actionDescription = "${expense.description}, ${formatExpenseHistoryDate(expense.occurredOn)}, ${formatBrazilianCents(expense.amountCents)}"
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.width(42.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                val dateParts = formatExpenseHistoryDate(expense.occurredOn).split(" ", limit = 2)
+                Text(dateParts.firstOrNull().orEmpty(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(dateParts.getOrNull(1).orEmpty(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    maxItemsInEachRow = Int.MAX_VALUE,
+                ) {
+                    Text(
+                        expense.description,
+                        modifier = Modifier.heightIn(min = 24.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    item.tags.forEach { tag ->
+                        Surface(
+                            modifier = Modifier.heightIn(min = 24.dp),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                        ) {
+                            Text(
+                                tag.name,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+                Text(
+                    formatBrazilianCents(expense.amountCents),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.semantics { contentDescription = "Editar lançamento $actionDescription" },
+                ) {
+                    Icon(painterResource(R.drawable.ic_edit), contentDescription = null)
+                }
+                Text("Editar", style = MaterialTheme.typography.labelSmall)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.semantics { contentDescription = "Excluir lançamento $actionDescription" },
+                ) {
+                    Icon(painterResource(R.drawable.ic_delete), contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                }
+                Text("Excluir", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+            }
+        }
+    }
 }

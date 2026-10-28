@@ -17,3 +17,14 @@ data class TagBudgetUsageRow(
     val budgetAmountCents: Long?,
     val spentCents: Long,
 )
+
+data class ExpenseTagListRow(
+    val id: String,
+    val description: String,
+    val amountCents: Long,
+    val occurredOn: String,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val tagId: String?,
+    val tagName: String?,
+)

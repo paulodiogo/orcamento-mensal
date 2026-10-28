@@ -21,6 +21,20 @@ interface ExpenseDao {
     @Query("SELECT * FROM expense ORDER BY occurredOn DESC, id DESC")
     fun observeAll(): Flow<List<ExpenseEntity>>
 
+    @Query("SELECT expense.id, expense.description, expense.amountCents, expense.occurredOn, expense.createdAt, expense.updatedAt, tag.id AS tagId, tag.name AS tagName " +
+        "FROM expense " +
+        "LEFT JOIN expense_tag ON expense_tag.expenseId = expense.id " +
+        "LEFT JOIN tag ON tag.id = expense_tag.tagId " +
+        "ORDER BY expense.occurredOn DESC, expense.id DESC, tag.normalizedName")
+    fun observeAllWithTags(): Flow<List<ExpenseTagListRow>>
+
+    @Query("SELECT expense.id, expense.description, expense.amountCents, expense.occurredOn, expense.createdAt, expense.updatedAt, tag.id AS tagId, tag.name AS tagName " +
+        "FROM expense " +
+        "LEFT JOIN expense_tag ON expense_tag.expenseId = expense.id " +
+        "LEFT JOIN tag ON tag.id = expense_tag.tagId " +
+        "ORDER BY expense.occurredOn DESC, expense.id DESC, tag.normalizedName")
+    suspend fun findAllWithTags(): List<ExpenseTagListRow>
+
     @Query("SELECT * FROM expense WHERE occurredOn BETWEEN :startDate AND :endDate ORDER BY occurredOn DESC, id DESC")
     suspend fun findBetween(startDate: String, endDate: String): List<ExpenseEntity>
 

@@ -13,7 +13,13 @@ class DateFieldsTest {
     @Test
     fun invalidOrEmptyDateDoesNotCreateAValue() {
         assertEquals("", formatDisplayDate(""))
+        assertEquals("", formatExpenseHistoryDate(""))
         assertNull(parseIsoDate("2026-02-30"))
+    }
+
+    @Test
+    fun formatsExpenseHistoryDateWithoutYear() {
+        assertEquals("15 out", formatExpenseHistoryDate("2026-10-15"))
     }
 
     @Test

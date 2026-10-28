@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
 import br.com.paulodiogo.orcamento.data.DatabaseOperationGate
 import br.com.paulodiogo.orcamento.data.ExpenseEntity
+import br.com.paulodiogo.orcamento.data.ExpenseTagListRow
 import br.com.paulodiogo.orcamento.data.TagEntity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -16,9 +17,19 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
+data class ExpenseListTag(
+    val id: String,
+    val name: String,
+)
+
+data class ExpenseListItem(
+    val expense: ExpenseEntity,
+    val tags: List<ExpenseListTag>,
+)
+
 sealed interface ExpenseListState {
     data object Loading : ExpenseListState
-    data class Content(val expenses: List<ExpenseEntity>) : ExpenseListState
+    data class Content(val expenses: List<ExpenseEntity>, val items: List<ExpenseListItem> = emptyList()) : ExpenseListState
     data object Empty : ExpenseListState
     data class Error(val message: String) : ExpenseListState
 }
@@ -60,12 +71,12 @@ class ExpenseListViewModel(private var database: BudgetDatabase) : ViewModel() {
         observationJob?.cancel()
         observationJob = viewModelScope.launch {
             runCatching {
-                kotlinx.coroutines.flow.combine(database.expenseDao().observeAll(), database.tagDao().observeAll()) { expenses, tags ->
-                    expenses to tags
-                }.collect { (expenses, tags) ->
+                kotlinx.coroutines.flow.combine(database.expenseDao().observeAllWithTags(), database.tagDao().observeAll()) { rows, tags ->
+                    rows to tags
+                }.collect { (rows, tags) ->
                     _tags.value = tags
                     currentTagId?.let { selected -> if (tags.none { it.id == selected }) currentTagId = null }
-                    DatabaseOperationGate.read { publish(expenses) }
+                    DatabaseOperationGate.read { publish(rows) }
                 }
             }.onFailure { _state.value = ExpenseListState.Error(it.message ?: "Não foi possível carregar os dados") }
         }
@@ -83,13 +94,21 @@ class ExpenseListViewModel(private var database: BudgetDatabase) : ViewModel() {
         observeDatabase()
     }
 
-    private suspend fun publish(expenses: List<ExpenseEntity>) {
+    private suspend fun publish(rows: List<ExpenseTagListRow>) {
+        val grouped = rows.groupBy { it.id }
+        val expenses = grouped.values.map { entries ->
+            val first = entries.first()
+            ExpenseEntity(first.id, first.description, first.amountCents, first.occurredOn, first.createdAt, first.updatedAt)
+        }
         currentExpenses = expenses
         runCatching {
-            val relations = expenses.associate { expense ->
-                expense.id to database.expenseTagDao().findTagIdsForExpense(expense.id).toSet()
-            }
-            filterExpenses(
+            val relations = grouped.mapValues { (_, entries) -> entries.mapNotNull { it.tagId }.toSet() }
+            val tagById = rows.mapNotNull { row ->
+                val id = row.tagId
+                val name = row.tagName
+                if (id == null || name == null) null else id to ExpenseListTag(id, name)
+            }.toMap()
+            val filtered = filterExpenses(
                 expenses,
                 currentQuery,
                 currentMonth,
@@ -99,8 +118,14 @@ class ExpenseListViewModel(private var database: BudgetDatabase) : ViewModel() {
                 currentTagId,
                 currentWithoutTag,
             )
+            filtered.map { expense ->
+                ExpenseListItem(expense, relations[expense.id].orEmpty().mapNotNull(tagById::get))
+            }
         }.onSuccess { filtered ->
-            _state.value = if (filtered.isEmpty()) ExpenseListState.Empty else ExpenseListState.Content(filtered)
+            _state.value = if (filtered.isEmpty()) ExpenseListState.Empty else ExpenseListState.Content(
+                expenses = filtered.map { it.expense },
+                items = filtered,
+            )
         }.onFailure { error ->
             _state.value = ExpenseListState.Error(error.message ?: "Não foi possível carregar os lançamentos")
         }
@@ -122,7 +147,7 @@ class ExpenseListViewModel(private var database: BudgetDatabase) : ViewModel() {
         currentWithoutTag = withoutTag
         _state.value = ExpenseListState.Loading
         viewModelScope.launch {
-            DatabaseOperationGate.read { publish(operations.findAll()) }
+            DatabaseOperationGate.read { publish(database.expenseDao().findAllWithTags()) }
         }
     }
 

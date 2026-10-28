@@ -33,6 +33,7 @@ import java.util.Locale
 
 private val isoFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 private val displayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.forLanguageTag("pt-BR"))
+private val expenseHistoryDateFormatter = DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("pt-BR"))
 private val monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("pt-BR"))
 
 internal fun todayIsoDate(): String = LocalDate.now().format(isoFormatter)
@@ -40,6 +41,11 @@ internal fun todayIsoDate(): String = LocalDate.now().format(isoFormatter)
 internal fun parseIsoDate(value: String): LocalDate? = runCatching { LocalDate.parse(value, isoFormatter) }.getOrNull()
 
 internal fun formatDisplayDate(value: String): String = parseIsoDate(value)?.format(displayFormatter).orEmpty()
+
+internal fun formatExpenseHistoryDate(value: String): String = parseIsoDate(value)?.format(expenseHistoryDateFormatter)
+    ?.lowercase(Locale.forLanguageTag("pt-BR"))
+    ?.replace(".", "")
+    .orEmpty()
 
 private fun LocalDate.toPickerMillis(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
