@@ -1,5 +1,17 @@
 # Progresso
 
+## Correção da apresentação do orçamento na listagem — implementada e validada
+
+A listagem agora sempre apresenta a segunda linha: `Disponível: ...` para tags com orçamento e `Orçamento não configurado` para tags sem orçamento, conforme o layout aprovado. O cálculo do saldo e a atualização reativa foram preservados. `testDebugUnitTest assembleDebug lintDebug` passou; `connectedDebugAndroidTest` passou no `BUSAO(AVD) - 16` após uma falha transitória de `ComposeNotIdleException`, sem falhas na execução final. Não houve alterações de esquema, dependências ou regras de negócio.
+
+## Redesign compacto da listagem de tags — implementado e validado
+
+A listagem de tags foi compactada em cartões de linha única: nome em destaque à esquerda, saldo disponível abaixo apenas para tags com orçamento e ações independentes de editar/excluir alinhadas à direita com ícones de lápis e lixeira. O texto genérico `Categoria de gastos` foi removido. As áreas `IconButton` mantêm o mínimo Material de 48 dp e as descrições acessíveis existentes. `testDebugUnitTest assembleDebug lintDebug`, `connectedDebugAndroidTest` e `git diff --check` passaram em 2026-10-28. O APK foi instalado no `emulator-5554` e uma captura foi produzida para inspeção visual; não foram observados problemas de inicialização. Não houve alteração de esquema, dependências ou regras de negócio.
+
+## Melhorias no gerenciamento de tags — implementadas e validadas tecnicamente
+
+A listagem de tags agora exibe o saldo disponível no mês atual somente quando há orçamento configurado, calculado pela regra existente `orçamento da tag - gastos associados no mês`; tags sem orçamento continuam sem valor monetário. O fluxo reativo combina a listagem de tags com a consulta agregada Room de uso por tag. As ações passaram a usar área independente, descrições acessíveis específicas e destaque discreto pela cor de erro na exclusão. Testes instrumentados cobrem saldo com/sem orçamento e descrições acessíveis. `testDebugUnitTest assembleDebug lintDebug`, `connectedDebugAndroidTest` (49 testes, 0 falhas) e `git diff --check` passaram em 2026-10-28. Não houve alteração de esquema, dependências ou regras de contabilização.
+
 ## Tags padrão na primeira inicialização — implementadas e parcialmente validadas
 
 `TagOperations.initializeDefaultTags` cria `Alimentação` e `Mercado` na mesma transação, reutiliza tags existentes sem sobrescrever dados e não cria registros financeiros. A execução é disparada no `MainActivity` após a recuperação do banco. Testes instrumentados cobrem inicialização, idempotência, criação parcial e preservação de dados. `testDebugUnitTest assembleDebug lintDebug` e `git diff --check` passaram. `connectedDebugAndroidTest` ficou bloqueado por ausência de dispositivo conectado.

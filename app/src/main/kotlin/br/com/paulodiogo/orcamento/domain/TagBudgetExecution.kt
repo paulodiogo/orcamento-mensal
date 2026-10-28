@@ -21,6 +21,9 @@ data class TagBudgetExecution(
     val isOverBudget: Boolean,
     val status: TagBudgetStatus,
 ) {
+    val availableCents: Long?
+        get() = budgetCents?.let { it - spentCents }
+
     val progressFraction: Float?
         get() = budgetCents
             ?.takeIf { it > 0L }

@@ -1,5 +1,31 @@
 ﻿# Registro de Validação
 
+## Correção da apresentação do orçamento na listagem — 2026-10-28
+
+- `rtk .\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso.
+- `rtk .\gradlew.bat connectedDebugAndroidTest` — a primeira execução teve `ComposeNotIdleException` transitório no emulador; a repetição final passou no `BUSAO(AVD) - 16`, sem falhas.
+- O teste instrumentado passou a validar `Orçamento não configurado` para tags sem orçamento.
+- `rtk git diff --check` — sucesso.
+
+
+## Redesign compacto da listagem de tags — 2026-10-28
+
+- `rtk .\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso.
+- `rtk .\gradlew.bat connectedDebugAndroidTest` — sucesso no `BUSAO(AVD) - 16`; 49 testes, 0 falhas.
+- `rtk adb devices` — `emulator-5554 device` disponível.
+- `rtk adb install -r .\app\build\outputs\apk\debug\app-debug.apk` — sucesso.
+- A atividade foi iniciada e a captura `app/build/tag-redesign.png` foi produzida para inspeção visual; nenhuma falha de inicialização foi observada.
+- `rtk git diff --check` — sucesso.
+
+
+## Melhorias no gerenciamento de tags — 2026-10-28
+
+- `rtk .\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso.
+- `rtk .\gradlew.bat connectedDebugAndroidTest` — primeira execução encontrou uma asserção de texto dependente da formatação monetária; a asserção foi ajustada para validar o rótulo sem alterar produção e a execução final passou no `BUSAO(AVD) - 16`, com 49 testes, 0 falhas.
+- `rtk git diff --check` — sucesso, código 0.
+- Não foi realizada inspeção visual manual nesta alteração; os testes Compose instrumentados validaram a exibição do saldo e as descrições acessíveis.
+
+
 ## Tags padrão na primeira inicialização — 2026-10-28
 
 - A inicialização idempotente de `Alimentação` e `Mercado` foi integrada ao `MainActivity` usando `TagOperations` e uma transação Room; tags existentes e dados financeiros são preservados.

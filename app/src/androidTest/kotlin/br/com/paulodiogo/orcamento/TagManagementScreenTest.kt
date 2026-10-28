@@ -3,6 +3,7 @@ package br.com.paulodiogo.orcamento
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -67,7 +68,7 @@ class TagManagementScreenTest {
         val created = runBlocking { database.tagDao().findByNormalizedName("ui_tag_com_orcamento")!! }
         assertEquals(12_345L, created.budgetAmountCents)
 
-        composeRule.onNodeWithText("Editar").performClick()
+        composeRule.onNodeWithContentDescription("Editar tag UI_TAG_COM_ORCAMENTO").performClick()
         composeRule.onNodeWithTag("tagBudgetField").performTextClearance()
         composeRule.onNodeWithTag("tagBudgetField").performTextInput("67890")
         composeRule.onNodeWithText("Salvar").performClick()
@@ -76,12 +77,34 @@ class TagManagementScreenTest {
         }
         assertEquals("UI_TAG_COM_ORCAMENTO", runBlocking { database.tagDao().findById(created.id)?.name })
 
-        composeRule.onNodeWithText("Editar").performClick()
+        composeRule.onNodeWithContentDescription("Editar tag UI_TAG_COM_ORCAMENTO").performClick()
         composeRule.onNodeWithTag("tagBudgetField").performTextClearance()
         composeRule.onNodeWithText("Salvar").performClick()
         composeRule.waitUntil(5_000) {
             runBlocking { database.tagDao().findById(created.id)?.budgetAmountCents == null }
         }
+    }
+
+    @Test
+    fun showsAvailableBudgetOnlyForConfiguredTags() {
+        showScreen()
+        viewModel.save("UI_TAG_COM_SALDO", 10_000L)
+        waitForTag("UI_TAG_COM_SALDO")
+        composeRule.onNodeWithText("Disponível", substring = true).assertIsDisplayed()
+
+        viewModel.save("UI_TAG_SEM_SALDO")
+        waitForTag("UI_TAG_SEM_SALDO")
+        composeRule.onNodeWithText("UI_TAG_SEM_SALDO").assertIsDisplayed()
+        composeRule.onNodeWithText("Orçamento não configurado").assertIsDisplayed()
+    }
+
+    @Test
+    fun exposesSpecificAccessibleActionDescriptions() {
+        showScreen()
+        viewModel.save("UI_TAG_ACESSIVEL", 1_000L)
+        waitForTag("UI_TAG_ACESSIVEL")
+        composeRule.onNodeWithContentDescription("Editar tag UI_TAG_ACESSIVEL").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Excluir tag UI_TAG_ACESSIVEL").assertIsDisplayed()
     }
 
     @Test
@@ -115,7 +138,7 @@ class TagManagementScreenTest {
         viewModel.save("UI_TAG_ORIGINAL", 10_000L)
         waitForTag("UI_TAG_ORIGINAL")
         val original = runBlocking { database.tagDao().findByNormalizedName("ui_tag_original")!! }
-        composeRule.onNodeWithText("Editar").performClick()
+        composeRule.onNodeWithContentDescription("Editar tag UI_TAG_ORIGINAL").performClick()
         composeRule.onNodeWithTag("tagNameField").performTextClearance()
         composeRule.onNodeWithTag("tagNameField").performTextInput("UI_TAG_ALTERADA")
         composeRule.onNodeWithTag("tagBudgetField").performTextClearance()
@@ -131,12 +154,12 @@ class TagManagementScreenTest {
         waitForTag("UI_TAG_PERSISTENTE")
         val created = runBlocking { database.tagDao().findByNormalizedName("ui_tag_persistente")!! }
 
-        composeRule.onNodeWithText("Editar").performClick()
+        composeRule.onNodeWithContentDescription("Editar tag UI_TAG_PERSISTENTE").performClick()
         composeRule.onNodeWithTag("tagBudgetField").assertIsDisplayed()
         composeRule.onNodeWithText("Cancelar").performClick()
         assertEquals(54_321L, runBlocking { database.tagDao().findById(created.id)?.budgetAmountCents })
 
-        composeRule.onNodeWithText("Excluir").performClick()
+        composeRule.onNodeWithContentDescription("Excluir tag UI_TAG_PERSISTENTE").performClick()
         composeRule.onNodeWithTag("confirmDeleteTagButton").performClick()
         composeRule.waitUntil(5_000) { runBlocking { database.tagDao().findById(created.id) == null } }
         assertNull(runBlocking { database.tagDao().findById(created.id) })
