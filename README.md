@@ -108,7 +108,3 @@ Contribuições podem ser propostas por pull request:
 2. Faça a mudança mantendo o escopo e a arquitetura existentes.
 3. Execute os testes e verificações pertinentes.
 4. Abra um pull request com a motivação e um resumo do que foi alterado.
-
-## Licença
-
-Este repositório não contém um arquivo de licença. A licença ainda precisa ser definida antes de apresentar o projeto como formalmente licenciado como código aberto. A publicação no GitHub, por si só, não concede autorização para reutilizar o código.
