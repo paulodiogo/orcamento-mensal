@@ -16,6 +16,20 @@ Aplicativo Android para registrar despesas e acompanhar o orçamento mensal, com
 - Acompanhar o percentual e o estado dos orçamentos por tag; gastos acima do limite recebem destaque visual.
 - Persistir os dados em banco local Room.
 
+## Capturas de tela
+
+| Tela inicial | Despesas |
+|---|---|
+| ![Tela inicial](docs/prints/inicio.png) | ![Despesas](docs/prints/despesas.png) |
+
+| Orçamentos | Relatórios |
+|---|---|
+| ![Orçamentos](docs/prints/orcamentos.png) | ![Relatórios](docs/prints/relatorios.png) |
+
+| Tags | Backup |
+|---|---|
+| ![Tags](docs/prints/tags.png) | ![Backup](docs/prints/backup.png) |
+
 ## Regras e limitações importantes
 
 - Valores monetários são armazenados em centavos inteiros. Cada lançamento de despesa é contabilizado uma vez no total mensal.
