@@ -18,17 +18,11 @@ Aplicativo Android para registrar despesas e acompanhar o orçamento mensal, com
 
 ## Capturas de tela
 
-| Tela inicial | Despesas |
-|---|---|
-| ![Tela inicial](docs/prints/inicio.png) | ![Despesas](docs/prints/despesas.png) |
-
-| Orçamentos | Relatórios |
-|---|---|
-| ![Orçamentos](docs/prints/orcamentos.png) | ![Relatórios](docs/prints/relatorios.png) |
-
-| Tags | Backup |
-|---|---|
-| ![Tags](docs/prints/tags.png) | ![Backup](docs/prints/backup.png) |
+| Tela inicial | Despesas | Orçamentos |
+|---|---|---|
+| <img src="docs/prints/inicio.png" alt="Tela inicial" width="75%"> | <img src="docs/prints/despesas.png" alt="Despesas" width="75%"> | <img src="docs/prints/orcamentos.png" alt="Orçamentos" width="75%"> |
+| Relatórios | Tags | Backup |
+| <img src="docs/prints/relatorios.png" alt="Relatórios" width="75%"> | <img src="docs/prints/tags.png" alt="Tags" width="75%"> | <img src="docs/prints/backup.png" alt="Backup" width="75%"> |
 
 ## Regras e limitações importantes
 
