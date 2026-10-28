@@ -13,6 +13,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -25,7 +27,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import br.com.paulodiogo.orcamento.domain.BudgetState
 import br.com.paulodiogo.orcamento.domain.BudgetViewModel
@@ -56,13 +61,24 @@ fun BudgetScreen(viewModel: BudgetViewModel, contentPadding: androidx.compose.fo
             is BudgetState.Content -> LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(current.budgets, key = { it.month }) { budget ->
                     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(budget.month, style = MaterialTheme.typography.titleMedium)
-                                Text(formatCents(budget.amountCents), style = MaterialTheme.typography.titleMedium)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        ) {
+                            Text(budget.month, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                            Text(formatCents(budget.amountCents), style = MaterialTheme.typography.titleMedium)
+                            IconButton(
+                                onClick = { viewModel.openMonth(budget.month) },
+                                modifier = Modifier.semantics {
+                                    contentDescription = "Editar orçamento de ${budget.month}"
+                                },
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_edit),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
                             }
-                            Text("Orçamento confirmado", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            TextButton(onClick = { viewModel.openMonth(budget.month) }) { Text("Editar orçamento") }
                         }
                     }
                 }

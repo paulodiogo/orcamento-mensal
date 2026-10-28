@@ -1,10 +1,14 @@
 package br.com.paulodiogo.orcamento
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
@@ -40,6 +44,17 @@ class BudgetScreenTest {
         composeRule.onNodeWithText("Orçamentos").assertTextContains("Orçamentos")
         composeRule.onNodeWithText("Abrir mês").assertTextContains("Abrir mês")
         composeRule.onNodeWithText("Nenhum mês configurado").assertTextContains("Nenhum mês configurado")
+    }
+
+    @Test
+    fun budgetCardUsesCompactAccessibleEditActionWithoutConfirmationText() {
+        runBlocking { BudgetOperations(database).save("2026-10", 500_000L) }
+        composeRule.setContent { BudgetScreen(viewModel) {} }
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodes(hasText("2026-10")).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onAllNodes(hasText("Orçamento confirmado")).assertCountEquals(0)
+        composeRule.onAllNodesWithContentDescription("Editar orçamento de 2026-10").assertCountEquals(1)
     }
 
     @Test
