@@ -6,6 +6,9 @@
     <string name="money_field_invalid">Use somente algarismos para informar o valor.</string>
     <string name="money_field_too_large">O valor excede o limite permitido.</string>
     <string name="budget_amount_label">Orçamento mensal</string>
+    <string name="tag_budget_label">Orçamento da tag (opcional)</string>
+    <string name="tag_budget_supporting">Deixe vazio para não definir um orçamento.</string>
+    <string name="tag_budget_invalid">Informe um orçamento válido.</string>
     <string name="expense_title_new">Novo lançamento</string>
     <string name="expense_title_edit">Editar lançamento</string>
     <string name="expense_required_fields">Preencha todos os campos</string>

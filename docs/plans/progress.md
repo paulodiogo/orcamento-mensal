@@ -1,8 +1,8 @@
 # Progresso
 
-## Fase 15 — orçamento associado a tags — planejamento concluído
+## Fase 15 — orçamento associado a tags — concluída e validada
 
-Planejado exclusivamente o cadastro, edição e persistência de orçamento opcional por tag. A proposta usa `Long?` em centavos na entidade `tag`: `NULL` significa ausência e `0L` significa zero explícito. A migração incremental 1→2 adicionará coluna nullable sem apagar tags, despesas ou associações `expense_tag`. O editor de tags reutilizará `MoneyTextField`; nenhuma tela fora do formulário de tags exibirá ou consumirá o valor. Implementação, migração e testes permanecem não iniciados. Detalhes em `docs/phases/phase-15-tag-budgets/`.
+Implementados `TagEntity.budgetAmountCents: Long?`, migração Room 1→2 com coluna nullable, operações independentes do orçamento mensal, formulário de criação/edição com `MoneyTextField` e testes instrumentados semânticos de CRUD. A migração histórica preservou dados, relações, índices e orçamento mensal; a independência aprovou alteração cruzada, soma superior e remoção. `TagManagementScreenTest` aprovou criação sem/com orçamento, edição, remoção, cancelamento, duplicidade, nome vazio e persistência em banco isolado. `connectedDebugAndroidTest` passou com 38 testes no `BUSAO(AVD) - 16`; `testDebugUnitTest`, `assembleDebug`, `lintDebug` e `git diff --check` também passaram. Não houve interação por coordenadas arbitrárias nem limpeza de dados do aplicativo.
 
 ## Fase 14 — padronização do espaçamento superior — concluída e validada
 

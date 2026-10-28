@@ -5,10 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.withTransaction
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [BudgetEntity::class, ExpenseEntity::class, TagEntity::class, ExpenseTagCrossRef::class],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class BudgetDatabase : RoomDatabase() {
@@ -18,6 +20,12 @@ abstract class BudgetDatabase : RoomDatabase() {
     abstract fun expenseTagDao(): ExpenseTagDao
 
     companion object {
+        val MIGRATION_1_2: Migration = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE tag ADD COLUMN budget_amount_cents INTEGER")
+            }
+        }
+
         @Volatile
         private var instance: BudgetDatabase? = null
 
@@ -27,7 +35,9 @@ abstract class BudgetDatabase : RoomDatabase() {
                     context.applicationContext,
                     BudgetDatabase::class.java,
                     "budget.db",
-                ).build().also { instance = it }
+                )
+                    .addMigrations(MIGRATION_1_2)
+                    .build().also { instance = it }
             }
     }
 }

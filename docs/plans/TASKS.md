@@ -5,4 +5,4 @@
 - **Evidências:** Fase 11: 23 testes JVM, 27 instrumentados, debug build, lint e inspeção de entrada no emulador aprovados; detalhes em `docs/phases/phase-11-money-input/VALIDATION.md`.
 - **Limitações conhecidas:** release unsigned conforme decisão explícita anterior; inspeção manual do teclado mostrou `inputType=2` e IME solicitado, mas o keypad visual não apareceu devido à configuração do AVD.
 - **Estado atual:** Fase 14 — padronização do espaçamento superior — concluída e validada; evidências em `docs/phases/phase-14-top-spacing/`.
-- **Próxima fase planejada:** Fase 15 — orçamento associado a tags; planejamento concluído, implementação não iniciada; documentos em `docs/phases/phase-15-tag-budgets/`.
+- **Estado da Fase 15:** concluída; migração, independência, CRUD instrumentado semântico e validações técnicas aprovados; documentos em `docs/phases/phase-15-tag-budgets/`.

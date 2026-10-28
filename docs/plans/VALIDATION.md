@@ -1,8 +1,19 @@
 ﻿# Registro de Validação
 
-## Fase 15 — planejamento de orçamento associado a tags
+## Fase 15 — implementação de orçamento associado a tags
 
-Nenhum comando de build, lint, teste, migração ou validação manual foi executado para esta fase. A estratégia e os cenários planejados estão em `docs/phases/phase-15-tag-budgets/VALIDATION.md`.
+- `rtk .\gradlew.bat testDebugUnitTest` — sucesso.
+- `rtk .\gradlew.bat assembleDebug lintDebug` — sucesso.
+- `rtk .\gradlew.bat connectedDebugAndroidTest` — sucesso no `BUSAO(AVD) - 16`.
+- `rtk git diff --check` — sucesso.
+- Teste histórico dedicado de migração 1→2 — aprovado em `connectedDebugAndroidTest`.
+- Testes de independência dos orçamentos — aprovados em `TagOperationsTest` instrumentado.
+- Validação manual dos controles do editor — aprovada por `uiautomator dump`.
+- `TagManagementScreenTest` — aprovado com cenários semânticos de criação, edição, cancelamento, remoção, duplicidade, nome vazio e persistência.
+- `connectedDebugAndroidTest` final — sucesso no `BUSAO(AVD) - 16`, 38 testes.
+- Validação de CRUD por coordenadas ADB não foi usada como evidência; os testes Compose instrumentados utilizaram seletores semânticos e banco isolado.
+
+Detalhes em `docs/phases/phase-15-tag-budgets/VALIDATION.md`.
 
 ## Fase 14 — 2026-10-27 — concluída e validada
 

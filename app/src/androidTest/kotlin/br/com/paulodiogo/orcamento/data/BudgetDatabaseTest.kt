@@ -1,6 +1,10 @@
 ﻿package br.com.paulodiogo.orcamento.data
 
+import android.content.Context
 import androidx.room.Room
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.room.withTransaction
@@ -28,6 +32,68 @@ class BudgetDatabaseTest {
     @After
     fun tearDown() {
         database.close()
+    }
+
+    @Test
+    fun migratesVersionOneDatabaseAndPreservesAllData() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val config = SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name("migration-test.db")
+            .callback(object : SupportSQLiteOpenHelper.Callback(1) {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    db.execSQL("CREATE TABLE IF NOT EXISTS monthly_budget (month TEXT NOT NULL, amountCents INTEGER NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, PRIMARY KEY(month))")
+                    db.execSQL("CREATE TABLE IF NOT EXISTS expense (id TEXT NOT NULL, description TEXT NOT NULL, amountCents INTEGER NOT NULL, occurredOn TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, PRIMARY KEY(id))")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS index_expense_occurredOn ON expense (occurredOn)")
+                    db.execSQL("CREATE TABLE IF NOT EXISTS tag (id TEXT NOT NULL, name TEXT NOT NULL, normalizedName TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, PRIMARY KEY(id))")
+                    db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_tag_normalizedName ON tag (normalizedName)")
+                    db.execSQL("CREATE TABLE IF NOT EXISTS expense_tag (expenseId TEXT NOT NULL, tagId TEXT NOT NULL, PRIMARY KEY(expenseId, tagId), FOREIGN KEY(expenseId) REFERENCES expense(id) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY(tagId) REFERENCES tag(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS index_expense_tag_tagId ON expense_tag (tagId)")
+                }
+
+                override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+            })
+            .build()
+        val helper = FrameworkSQLiteOpenHelperFactory().create(config)
+        val oldDatabase = helper.writableDatabase
+        oldDatabase.execSQL("INSERT INTO monthly_budget VALUES ('2026-10', 100000, 1, 1)")
+        oldDatabase.execSQL("INSERT INTO expense VALUES ('expense-1', 'Compra', 2500, '2026-10-27', 1, 1)")
+        oldDatabase.execSQL("INSERT INTO tag VALUES ('tag-1', 'Casa', 'casa', 1, 1)")
+        oldDatabase.execSQL("INSERT INTO expense_tag VALUES ('expense-1', 'tag-1')")
+        oldDatabase.version = 1
+        oldDatabase.close()
+        helper.close()
+
+        val migratedDatabase = Room.databaseBuilder(context, BudgetDatabase::class.java, "migration-test.db")
+            .addMigrations(BudgetDatabase.MIGRATION_1_2)
+            .build()
+        val migratedSqlite = migratedDatabase.openHelper.writableDatabase
+        val columns = migratedSqlite.query("PRAGMA table_info(tag)").use { cursor ->
+            buildList {
+                while (cursor.moveToNext()) add(cursor.getString(cursor.getColumnIndexOrThrow("name")))
+            }
+        }
+        assertTrue(columns.contains("budget_amount_cents"))
+        assertNull(migratedSqlite.query("SELECT budget_amount_cents FROM tag WHERE id = 'tag-1'").use { cursor -> cursor.moveToFirst(); if (cursor.isNull(0)) null else cursor.getLong(0) })
+        assertEquals("Casa", migratedSqlite.query("SELECT name FROM tag WHERE id = 'tag-1'").use { cursor -> cursor.moveToFirst(); cursor.getString(0) })
+        assertEquals("Compra", migratedSqlite.query("SELECT description FROM expense WHERE id = 'expense-1'").use { cursor -> cursor.moveToFirst(); cursor.getString(0) })
+        assertEquals(100000L, migratedSqlite.query("SELECT amountCents FROM monthly_budget WHERE month = '2026-10'").use { cursor -> cursor.moveToFirst(); cursor.getLong(0) })
+        assertEquals(1, migratedSqlite.query("SELECT COUNT(*) FROM expense_tag WHERE expenseId = 'expense-1' AND tagId = 'tag-1'").use { cursor -> cursor.moveToFirst(); cursor.getInt(0) })
+        val tagIndexes = migratedSqlite.query("PRAGMA index_list('tag')").use { cursor ->
+            buildList {
+                while (cursor.moveToNext()) add(cursor.getString(cursor.getColumnIndexOrThrow("name")))
+            }
+        }
+        val expenseTagIndexes = migratedSqlite.query("PRAGMA index_list('expense_tag')").use { cursor ->
+            buildList {
+                while (cursor.moveToNext()) add(cursor.getString(cursor.getColumnIndexOrThrow("name")))
+            }
+        }
+        assertTrue(tagIndexes.contains("index_tag_normalizedName"))
+        assertTrue(expenseTagIndexes.contains("index_expense_tag_tagId"))
+        assertNull(runDatabaseOn(migratedDatabase) { tagDao().findById("tag-1")?.budgetAmountCents })
+        assertEquals(100000L, runDatabaseOn(migratedDatabase) { budgetDao().findByMonth("2026-10")?.amountCents })
+        migratedDatabase.close()
+        context.deleteDatabase("migration-test.db")
     }
 
     @Test
@@ -110,5 +176,8 @@ class BudgetDatabaseTest {
 
     private fun <T> runDatabase(block: suspend BudgetDatabase.() -> T): T =
         kotlinx.coroutines.runBlocking { block(database) }
+
+    private fun <T> runDatabaseOn(target: BudgetDatabase, block: suspend BudgetDatabase.() -> T): T =
+        kotlinx.coroutines.runBlocking { block(target) }
 }
 

@@ -36,12 +36,22 @@ class TagViewModel(private val database: BudgetDatabase) : ViewModel() {
         // Kept for callers that explicitly request a refresh; the Room flow is authoritative.
     }
 
-    fun save(name: String, editingId: String? = null, onComplete: () -> Unit = {}) {
+    fun save(
+        name: String,
+        budgetAmountCents: Long? = null,
+        editingId: String? = null,
+        onComplete: () -> Unit = {},
+        onError: (Throwable) -> Unit = {},
+    ) {
         viewModelScope.launch {
             runCatching {
-                if (editingId == null) operations.createOrReuse(name) else operations.rename(editingId, name)
+                if (editingId == null) operations.create(name, budgetAmountCents)
+                else operations.update(editingId, name, budgetAmountCents)
             }.onSuccess { refresh(); onComplete() }
-                .onFailure { _state.value = TagState.Error(it.message ?: "Não foi possível salvar a tag") }
+                .onFailure {
+                    _state.value = TagState.Error(it.message ?: "Não foi possível salvar a tag")
+                    onError(it)
+                }
         }
     }
 
