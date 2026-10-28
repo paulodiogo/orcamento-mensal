@@ -137,21 +137,7 @@ private fun HomeScreen(
                 SummaryCard("Saldo disponível", formatBrazilianCents(current.execution.availableCents), "de ${formatBrazilianCents(budget)} planejados", Modifier.fillMaxWidth())
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     SummaryCard("Despesas", formatBrazilianCents(current.execution.spentCents), modifier = Modifier.weight(1f))
-                    SummaryCard("Consumo", current.execution.percentage?.let { "$it%" } ?: "—", "do orçamento", Modifier.weight(1f))
-                }
-                SectionHeader("Onde você gastou")
-                val spentTags = current.tagBudgetExecutions.filter { it.spentCents > 0L }
-                if (spentTags.isEmpty()) Text("Nenhuma despesa por tag neste mês", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                else spentTags.take(4).forEach { tag ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Column {
-                            Text(tag.tagName)
-                            if (tag.budgetCents == null) {
-                                Text("Sem orçamento", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                        Text(formatBrazilianCents(tag.spentCents), fontWeight = FontWeight.SemiBold)
-                    }
+                    SummaryCard("Consumo", current.execution.percentage?.let { "$it%" } ?: "—", "", Modifier.weight(1f))
                 }
                 SectionHeader("Orçamento por tag")
                 val budgetedTags = current.tagBudgetExecutions.filter { it.budgetCents != null }
@@ -160,8 +146,6 @@ private fun HomeScreen(
                 } else {
                     budgetedTags.take(4).forEach { TagBudgetRow(it) }
                 }
-                SectionHeader("Ações rápidas")
-                Button(onClick = onSeeExpenses, modifier = Modifier.fillMaxWidth()) { Text("Ver todos os lançamentos") }
             }
         }
     }

@@ -27,6 +27,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityComposeTest {
@@ -125,9 +127,13 @@ class MainActivityComposeTest {
                 onSave = { _, cents, _, _ -> savedCents = cents },
             )
         }
+
+        val hoje = LocalDate.now()
+            .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
         composeRule.onNodeWithText("Descrição").performTextInput("Compra")
         composeRule.onNodeWithTag("moneyTextField").performTextInput("12345")
-        composeRule.onNodeWithTag("expenseDateField").assertTextContains("27/10/2026")
+        composeRule.onNodeWithTag("expenseDateField").assertTextContains(hoje)
         composeRule.onNodeWithText("Salvar").performClick()
         composeRule.runOnIdle { assertEquals(12_345L, savedCents) }
 

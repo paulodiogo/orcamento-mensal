@@ -98,11 +98,15 @@ internal fun TagBudgetRow(execution: TagBudgetExecution) {
                     style = MaterialTheme.typography.titleSmall,
                 )
             }
+
+            val resto: Long? = execution.budgetCents?.minus(execution.spentCents)
+
             Text(
                 stringResource(
                     R.string.tag_budget_spend_and_limit,
                     formatCents(execution.spentCents),
                     execution.budgetCents?.let(::formatCents) ?: stringResource(R.string.tag_budget_none),
+                    resto?.let(::formatCents) ?: "",
                 ),
             )
             execution.progressFraction?.let { progress ->

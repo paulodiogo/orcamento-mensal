@@ -60,8 +60,8 @@ class ReportScreenTest {
         composeRule.onNodeWithText("Orçamento por tag").assertTextContains("Orçamento por tag")
         composeRule.onNodeWithTag("tagBudgetPercentage_${budgeted.id}").assertTextContains("40,00%")
         composeRule.onNodeWithTag("tagBudgetPercentage_${unbudgeted.id}").assertTextContains("Sem orçamento")
-        composeRule.onNodeWithText("R$ 200,00 de R$ 500,00", useUnmergedTree = true)
-            .assertTextContains("R$ 200,00 de R$ 500,00")
+        composeRule.onNodeWithText("R$ 200,00 de R$ 500,00 (R$ 300,00)", useUnmergedTree = true)
+            .assertTextContains("R$ 200,00 de R$ 500,00 (R$ 300,00)")
     }
 
     @Test
@@ -91,8 +91,8 @@ class ReportScreenTest {
             .assertTextContains("130,00%")
         composeRule.onNodeWithText("Acima do orçamento", useUnmergedTree = true)
             .assertTextContains("Acima do orçamento")
-        composeRule.onNodeWithText("R$ 650,00 de R$ 500,00", useUnmergedTree = true)
-            .assertTextContains("R$ 650,00 de R$ 500,00")
+        composeRule.onNodeWithText("R$ 650,00 de R$ 500,00 (-R$ 150,00)", useUnmergedTree = true)
+            .assertTextContains("R$ 650,00 de R$ 500,00 (-R$ 150,00)")
         composeRule.onNodeWithTag("tagBudgetPercentage_${budgeted.id}").assertTextContains("130,00%")
     }
 
