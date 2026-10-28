@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -38,10 +40,16 @@ fun BudgetTheme(content: @Composable () -> Unit) {
 fun ScreenContent(
     contentPadding: PaddingValues,
     horizontalPadding: androidx.compose.ui.unit.Dp = 20.dp,
+    scrollable: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val scrollModifier = if (scrollable) {
+        Modifier.verticalScroll(rememberScrollState())
+    } else {
+        Modifier
+    }
     Column(
-        modifier = Modifier.fillMaxSize().padding(contentPadding).padding(horizontal = horizontalPadding),
+        modifier = Modifier.fillMaxSize().padding(contentPadding).then(scrollModifier).padding(horizontal = horizontalPadding),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         content = content,
     )

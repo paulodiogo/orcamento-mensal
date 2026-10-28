@@ -1,5 +1,11 @@
 # Progresso
 
+## Fase 16 — acompanhamento de orçamento por tag — implementada e validada tecnicamente
+
+Escopo autorizado em 2026-10-27: exibir consumo por tag no mês atual em Home e Relatórios; usar orçamento atual da tag; sem seletor de mês na Home, histórico versionado, migração ou alteração do orçamento global. Planejamento e evidências em `docs/phases/phase-16-tag-budget-usage/`.
+
+Implementados cálculo compartilhado, consulta agregada Room reativa, integração no estado do relatório e exibição nas duas telas. `testDebugUnitTest` passou com 28 testes; `assembleDebug lintDebug` passou; `connectedDebugAndroidTest` passou com 41 testes no `BUSAO(AVD) - 16`; `git diff --check` passou. Execuções anteriores tiveram falhas transitórias de AVD e de uma asserção, corrigidas ou não reproduzidas na execução completa aprovada. Não houve alteração de persistência, dependências, versões ou orçamento global. Nenhuma fase posterior foi iniciada.
+
 ## Fase 15 — orçamento associado a tags — concluída e validada
 
 Implementados `TagEntity.budgetAmountCents: Long?`, migração Room 1→2 com coluna nullable, operações independentes do orçamento mensal, formulário de criação/edição com `MoneyTextField` e testes instrumentados semânticos de CRUD. A migração histórica preservou dados, relações, índices e orçamento mensal; a independência aprovou alteração cruzada, soma superior e remoção. `TagManagementScreenTest` aprovou criação sem/com orçamento, edição, remoção, cancelamento, duplicidade, nome vazio e persistência em banco isolado. `connectedDebugAndroidTest` passou com 38 testes no `BUSAO(AVD) - 16`; `testDebugUnitTest`, `assembleDebug`, `lintDebug` e `git diff --check` também passaram. Não houve interação por coordenadas arbitrárias nem limpeza de dados do aplicativo.

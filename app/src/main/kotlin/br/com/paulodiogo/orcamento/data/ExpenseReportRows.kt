@@ -10,3 +10,10 @@ data class TagExpenseTotal(
     val tagName: String,
     val amountCents: Long,
 )
+
+data class TagBudgetUsageRow(
+    val tagId: String,
+    val tagName: String,
+    val budgetAmountCents: Long?,
+    val spentCents: Long,
+)

@@ -45,6 +45,33 @@ class DomainRulesTest {
     }
 
     @Test
+    fun calculatesTagBudgetUsageForNormalZeroMissingAndExceededBudgets() {
+        assertEquals(BigDecimal("40.00"), calculateTagBudgetExecution("tag", "Casa", 50_000L, 20_000L).percentage)
+        val exceeded = calculateTagBudgetExecution("tag", "Casa", 50_000L, 65_000L)
+        assertEquals(BigDecimal("130.00"), exceeded.percentage)
+        assertEquals(true, exceeded.isOverBudget)
+        assertEquals(1f, exceeded.progressFraction)
+        assertEquals(BigDecimal("100.00"), calculateTagBudgetExecution("tag", "Casa", 50_000L, 50_000L).percentage)
+        assertEquals(BigDecimal("0.00"), calculateTagBudgetExecution("tag", "Casa", 50_000L, 0L).percentage)
+        assertEquals(null, calculateTagBudgetExecution("tag", "Casa", null, 5_000L).percentage)
+        assertEquals(null, calculateTagBudgetExecution("tag", "Casa", 0L, 0L).percentage)
+        val zeroExceeded = calculateTagBudgetExecution("tag", "Casa", 0L, 1L)
+        assertEquals(null, zeroExceeded.percentage)
+        assertEquals(true, zeroExceeded.isOverBudget)
+        assertEquals(BigDecimal("16.67"), calculateTagBudgetExecution("tag", "Casa", 6L, 1L).percentage)
+    }
+
+    @Test
+    fun rejectsInvalidTagBudgetUsageValues() {
+        assertThrows(DomainError.InvalidSpentAmount::class.java) {
+            calculateTagBudgetExecution("tag", "Casa", 50L, -1L)
+        }
+        assertThrows(DomainError.NegativeBudget::class.java) {
+            calculateTagBudgetExecution("tag", "Casa", -1L, 0L)
+        }
+    }
+
+    @Test
     fun rejectsInvalidSpentAmountAndOverflow() {
         assertThrows(DomainError.InvalidSpentAmount::class.java) { calculateBudgetExecution(10L, -1L) }
         assertThrows(DomainError.ArithmeticOverflow::class.java) {

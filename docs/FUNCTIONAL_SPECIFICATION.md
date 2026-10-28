@@ -12,6 +12,8 @@ Tags globais são rótulos planos, não obrigatórios e sem hierarquia. Ao infor
 ## Resumo e relatórios
 Para o mês selecionado: orçamento, soma única dos lançamentos, saldo `orçamento − gasto` e percentual `gasto / orçamento × 100`. Se orçamento for zero, percentual é indisponível; valores são formatados em moeda local. Indicadores visuais sugeridos: abaixo de 80%, 80% a menor que 100%, 100% ou mais; são informativos apenas no orçamento mensal. O agrupamento por tag conta o valor integral para cada tag: suas linhas podem somar mais que o gasto mensal. Não há rateio automático.
 
+A Home e os relatórios comparam o gasto acumulado da tag no mês atual local com o orçamento atualmente configurado para a tag. O percentual é `gasto da tag / orçamento da tag × 100`, arredondado a duas casas para exibição; estouro é determinado pelos valores monetários. `NULL` é apresentado como `Sem orçamento` sem percentual/barra. Orçamento zero tem consumo `Indisponível`; se houver gasto, recebe destaque `Acima do orçamento`. Orçamento positivo sem gasto mostra `0,00%`. Acima de 100%, o percentual real é exibido e somente a barra é limitada a 100%. Tags com orçamento e sem despesas aparecem com gasto zero; tags sem orçamento e sem gastos são omitidas. O orçamento por tag usa o valor atual armazenado; não há histórico mensal versionado. Essas comparações não alteram o orçamento global.
+
 ## Persistência e reinício
 Dados salvos devem reaparecer após reinício. O aplicativo funciona sem internet. Sem backup próprio, perda/desinstalação/dano do armazenamento pode ser irrecuperável.
 

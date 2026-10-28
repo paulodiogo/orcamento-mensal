@@ -14,7 +14,9 @@
 | RN-010 | Renomear uma tag preserva associações e histórico; conflito de chave normalizada é recusado. Excluir tag remove apenas suas associações em transação, preservando todos os lançamentos. |
 | RN-011 | Criar/editar/excluir lançamento, criar/associar tags e excluir tag com suas associações ocorrem atomicamente nas respectivas operações. |
 | RN-012 | Configurar/editar orçamento não modifica lançamentos nem os bloqueia por ultrapassagem. |
-| RN-013 | Orçamento por tag é opcional: ausência é `NULL`, enquanto zero explícito é `0` em centavos; sua edição não altera nome, identidade ou associações da tag. A regra será implementada somente após autorização da Fase 15. |
+| RN-013 | Orçamento por tag é opcional: ausência é `NULL`, enquanto zero explícito é `0` em centavos; sua edição não altera nome, identidade ou associações da tag. |
+| RN-014 | Consumo do orçamento por tag é `gasto mensal associado / orçamento atual da tag × 100`; `NULL` não tem percentual, zero é indisponível e estouro é comparado em centavos. A exibição não altera orçamento ou saldo global. |
+| RN-015 | Gastos por tag são filtrados pelo mês atual local. A despesa associada a várias tags conta integralmente em cada tag; tags orçadas sem despesas contam como gasto zero. O orçamento por tag não tem histórico mensal versionado. |
 
 Possibilidade futura fora de escopo: rateio explícito por tag, que exigiria nova regra de soma e migração.
 

@@ -46,6 +46,16 @@ interface ExpenseDao {
         "GROUP BY tag.id, tag.name ORDER BY tag.name")
     suspend fun sumAmountByTagBetween(startDate: String, endDate: String): List<TagExpenseTotal>
 
+    @Query("SELECT tag.id AS tagId, tag.name AS tagName, tag.budget_amount_cents AS budgetAmountCents, " +
+        "COALESCE(SUM(CASE WHEN expense.occurredOn BETWEEN :startDate AND :endDate THEN expense.amountCents ELSE 0 END), 0) AS spentCents " +
+        "FROM tag " +
+        "LEFT JOIN expense_tag ON expense_tag.tagId = tag.id " +
+        "LEFT JOIN expense ON expense.id = expense_tag.expenseId " +
+        "GROUP BY tag.id, tag.name, tag.budget_amount_cents " +
+        "HAVING tag.budget_amount_cents IS NOT NULL OR spentCents > 0 " +
+        "ORDER BY tag.name")
+    fun observeTagBudgetUsageBetween(startDate: String, endDate: String): Flow<List<TagBudgetUsageRow>>
+
     @Update
     suspend fun update(expense: ExpenseEntity)
 

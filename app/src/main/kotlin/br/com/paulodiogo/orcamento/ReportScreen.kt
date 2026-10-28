@@ -24,8 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import br.com.paulodiogo.orcamento.R
 import br.com.paulodiogo.orcamento.domain.ReportState
+import br.com.paulodiogo.orcamento.domain.TagBudgetExecution
 import br.com.paulodiogo.orcamento.domain.ReportViewModel
 import java.math.BigDecimal
 import java.text.NumberFormat
@@ -38,7 +42,7 @@ fun ReportScreen(viewModel: ReportViewModel, contentPadding: androidx.compose.fo
     val state by viewModel.state.collectAsState()
     LaunchedEffect(month) { viewModel.load(month) }
 
-    ScreenContent(contentPadding, horizontalPadding = 16.dp) {
+    ScreenContent(contentPadding, horizontalPadding = 16.dp, scrollable = true) {
         ScreenTitle("Relatórios", "Entenda para onde seu dinheiro está indo")
         MonthField(value = month, onValueChange = { month = it }, modifier = Modifier.fillMaxWidth(), label = "Mês")
         when (val current = state) {
@@ -56,23 +60,56 @@ fun ReportScreen(viewModel: ReportViewModel, contentPadding: androidx.compose.fo
                         current.execution.percentage?.let { LinearProgressIndicator({ (it.toDouble() / 100.0).coerceIn(0.0, 1.0).toFloat() }, Modifier.fillMaxWidth()) }
                     }
                 }
-                Text("Distribuição por tag", style = MaterialTheme.typography.titleMedium)
-                if (current.tagTotals.isEmpty()) {
-                    Text("Nenhuma tag no período")
+                Text("Orçamento por tag", style = MaterialTheme.typography.titleMedium)
+                if (current.tagBudgetExecutions.isEmpty()) {
+                    Text("Nenhuma tag com gastos ou orçamento neste mês")
                 } else {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(current.tagTotals, key = { it.tagId }) { total ->
-                            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(total.tagName)
-                                    Text(formatCents(total.amountCents), style = MaterialTheme.typography.titleSmall)
-                                }
-                                val totalSpent = current.execution.spentCents.coerceAtLeast(1L)
-                                LinearProgressIndicator({ (total.amountCents.toDouble() / totalSpent).coerceIn(0.0, 1.0).toFloat() }, Modifier.fillMaxWidth())
-                            }
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        current.tagBudgetExecutions.forEach { execution ->
+                            TagBudgetRow(execution)
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun TagBudgetRow(execution: TagBudgetExecution) {
+    val statusLabel = when {
+        execution.isOverBudget -> stringResource(R.string.tag_budget_over_budget)
+        execution.budgetCents == null -> stringResource(R.string.tag_budget_none)
+        execution.percentage == null -> stringResource(R.string.tag_budget_unavailable)
+        else -> null
+    }
+    val containerColor = if (execution.isOverBudget) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceVariant
+    Card(
+        modifier = Modifier.fillMaxWidth().testTag("tagBudgetRow_${execution.tagId}"),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+    ) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(execution.tagName, style = MaterialTheme.typography.titleSmall)
+                Text(
+                    execution.percentage?.let(::formatPercentage) ?: (statusLabel ?: stringResource(R.string.tag_budget_unavailable)),
+                    modifier = Modifier.testTag("tagBudgetPercentage_${execution.tagId}"),
+                    color = if (execution.isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+            }
+            Text(
+                stringResource(
+                    R.string.tag_budget_spend_and_limit,
+                    formatCents(execution.spentCents),
+                    execution.budgetCents?.let(::formatCents) ?: stringResource(R.string.tag_budget_none),
+                ),
+            )
+            execution.progressFraction?.let { progress ->
+                LinearProgressIndicator({ progress }, Modifier.fillMaxWidth())
+            }
+            if (statusLabel != null) {
+                Text(statusLabel, color = if (execution.isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -82,4 +119,9 @@ private fun formatCents(cents: Long): String =
     NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
         .format(BigDecimal.valueOf(cents).movePointLeft(2))
 
-private fun formatPercentage(value: BigDecimal): String = "$value%"
+private fun formatPercentage(value: BigDecimal): String {
+    val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("pt-BR"))
+    formatter.minimumFractionDigits = 2
+    formatter.maximumFractionDigits = 2
+    return "${formatter.format(value)}%"
+}

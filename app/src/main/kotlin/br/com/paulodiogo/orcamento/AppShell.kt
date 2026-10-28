@@ -19,6 +19,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import br.com.paulodiogo.orcamento.R
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
@@ -46,6 +48,8 @@ import br.com.paulodiogo.orcamento.domain.ReportState
 import br.com.paulodiogo.orcamento.domain.ReportViewModel
 import br.com.paulodiogo.orcamento.domain.TagState
 import br.com.paulodiogo.orcamento.domain.TagViewModel
+import java.text.NumberFormat
+import java.util.Locale
 import java.time.YearMonth
 
 private enum class MainDestination { HOME, EXPENSES, REPORTS, BUDGETS, TAGS }
@@ -122,7 +126,7 @@ private fun HomeScreen(
 ) {
     val state by reports.state.collectAsState()
     LaunchedEffect(month) { reports.load(month) }
-    ScreenContent(padding, horizontalPadding = 20.dp) {
+    ScreenContent(padding, horizontalPadding = 20.dp, scrollable = true) {
         ScreenTitle("Olá, vamos organizar?", "Visão do seu orçamento em $month")
         when (val current = state) {
             ReportState.Idle, ReportState.Loading -> CircularProgressIndicator(Modifier.size(28.dp))
@@ -136,12 +140,25 @@ private fun HomeScreen(
                     SummaryCard("Consumo", current.execution.percentage?.let { "$it%" } ?: "—", "do orçamento", Modifier.weight(1f))
                 }
                 SectionHeader("Onde você gastou")
-                if (current.tagTotals.isEmpty()) Text("Nenhuma despesa por tag neste mês", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                else current.tagTotals.take(4).forEach { total ->
+                val spentTags = current.tagBudgetExecutions.filter { it.spentCents > 0L }
+                if (spentTags.isEmpty()) Text("Nenhuma despesa por tag neste mês", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                else spentTags.take(4).forEach { tag ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(total.tagName)
-                        Text(formatBrazilianCents(total.amountCents), fontWeight = FontWeight.SemiBold)
+                        Column {
+                            Text(tag.tagName)
+                            if (tag.budgetCents == null) {
+                                Text("Sem orçamento", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                        Text(formatBrazilianCents(tag.spentCents), fontWeight = FontWeight.SemiBold)
                     }
+                }
+                SectionHeader("Orçamento por tag")
+                val budgetedTags = current.tagBudgetExecutions.filter { it.budgetCents != null }
+                if (budgetedTags.isEmpty()) {
+                    Text(stringResource(R.string.tag_budget_home_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    budgetedTags.take(4).forEach { TagBudgetRow(it) }
                 }
                 SectionHeader("Ações rápidas")
                 Button(onClick = onSeeExpenses, modifier = Modifier.fillMaxWidth()) { Text("Ver todos os lançamentos") }

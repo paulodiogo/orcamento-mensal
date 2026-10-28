@@ -8,6 +8,8 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.room.withTransaction
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -151,6 +153,55 @@ class BudgetDatabaseTest {
         assertEquals(0, runDatabase { expenseDao().countBetween("2027-01-01", "2027-01-31") })
         assertTrue(runDatabase { expenseDao().sumAmountByMonthBetween("2027-01-01", "2027-01-31") }.isEmpty())
         assertTrue(runDatabase { expenseDao().sumAmountByTagBetween("2027-01-01", "2027-01-31") }.isEmpty())
+    }
+
+    @Test
+    fun observesTagBudgetsIncludingZeroSpendAndOnlyCurrentMonthExpenses() {
+        val budgeted = TagEntity("tag-budgeted", "Budgeted", "budgeted", 1L, 1L, 50_000L)
+        val unbudgeted = TagEntity("tag-unbudgeted", "Unbudgeted", "unbudgeted", 1L, 1L)
+        val noSpend = TagEntity("tag-no-spend", "No spend", "no-spend", 1L, 1L, 10_000L)
+        val current = ExpenseEntity("expense-current", "Current", 20_000L, "2026-10-10", 1L, 1L)
+        val older = ExpenseEntity("expense-older", "Older", 8_000L, "2026-09-10", 1L, 1L)
+        runDatabase {
+            tagDao().insert(budgeted)
+            tagDao().insert(unbudgeted)
+            tagDao().insert(noSpend)
+            expenseDao().insert(current)
+            expenseDao().insert(older)
+            expenseTagDao().insertAll(
+                listOf(
+                    ExpenseTagCrossRef(current.id, budgeted.id),
+                    ExpenseTagCrossRef(current.id, unbudgeted.id),
+                    ExpenseTagCrossRef(older.id, unbudgeted.id),
+                ),
+            )
+        }
+
+        val rows = runDatabase {
+            expenseDao().observeTagBudgetUsageBetween("2026-10-01", "2026-10-31").first()
+        }
+        assertEquals(3, rows.size)
+        assertEquals(20_000L, rows.single { it.tagId == budgeted.id }.spentCents)
+        assertEquals(50_000L, rows.single { it.tagId == budgeted.id }.budgetAmountCents)
+        assertEquals(0L, rows.single { it.tagId == noSpend.id }.spentCents)
+        assertNull(rows.single { it.tagId == unbudgeted.id }.budgetAmountCents)
+        assertEquals(20_000L, rows.single { it.tagId == unbudgeted.id }.spentCents)
+
+        val updates = runDatabase {
+            kotlinx.coroutines.coroutineScope {
+                val initial = expenseDao().observeTagBudgetUsageBetween("2026-10-01", "2026-10-31").first()
+                val changed = async {
+                    expenseDao().observeTagBudgetUsageBetween("2026-10-01", "2026-10-31").first { rows ->
+                        rows.single { it.tagId == budgeted.id }.spentCents == 23_000L
+                    }
+                }
+                expenseDao().insert(ExpenseEntity("expense-update", "Update", 3_000L, "2026-10-20", 1L, 1L))
+                expenseTagDao().insert(ExpenseTagCrossRef("expense-update", budgeted.id))
+                initial to changed.await()
+            }
+        }
+        assertEquals(20_000L, updates.first.single { it.tagId == budgeted.id }.spentCents)
+        assertEquals(23_000L, updates.second.single { it.tagId == budgeted.id }.spentCents)
     }
 
     @Test

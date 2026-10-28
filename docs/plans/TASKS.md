@@ -6,3 +6,4 @@
 - **Limitações conhecidas:** release unsigned conforme decisão explícita anterior; inspeção manual do teclado mostrou `inputType=2` e IME solicitado, mas o keypad visual não apareceu devido à configuração do AVD.
 - **Estado atual:** Fase 14 — padronização do espaçamento superior — concluída e validada; evidências em `docs/phases/phase-14-top-spacing/`.
 - **Estado da Fase 15:** concluída; migração, independência, CRUD instrumentado semântico e validações técnicas aprovados; documentos em `docs/phases/phase-15-tag-budgets/`.
+- **Fase 16:** acompanhamento mensal do orçamento por tag em Home e Relatórios; implementação e validações técnicas concluídas, sem seletor na Home ou histórico versionado; documentos em `docs/phases/phase-16-tag-budget-usage/`.

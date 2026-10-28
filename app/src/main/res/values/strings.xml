@@ -9,6 +9,11 @@
     <string name="tag_budget_label">Orçamento da tag (opcional)</string>
     <string name="tag_budget_supporting">Deixe vazio para não definir um orçamento.</string>
     <string name="tag_budget_invalid">Informe um orçamento válido.</string>
+    <string name="tag_budget_over_budget">Acima do orçamento</string>
+    <string name="tag_budget_none">Sem orçamento</string>
+    <string name="tag_budget_unavailable">Indisponível</string>
+    <string name="tag_budget_spend_and_limit">%1$s de %2$s</string>
+    <string name="tag_budget_home_empty">Nenhuma tag com orçamento configurado neste mês</string>
     <string name="expense_title_new">Novo lançamento</string>
     <string name="expense_title_edit">Editar lançamento</string>
     <string name="expense_required_fields">Preencha todos os campos</string>
