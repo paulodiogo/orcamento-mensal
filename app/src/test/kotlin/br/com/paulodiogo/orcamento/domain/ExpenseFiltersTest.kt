@@ -30,6 +30,17 @@ class ExpenseFiltersTest {
         assertEquals(listOf("1"), filterExpenses(expenses, month = "2026-10", tagIdsByExpense = tags).map { it.id })
         assertEquals(listOf("2"), filterExpenses(expenses, startDate = "2026-11-01", endDate = "2026-11-30", tagIdsByExpense = tags).map { it.id })
     }
+
+    @Test
+    fun filtersByDescriptionTagAndExpensesWithoutTags() {
+        val moreExpenses = expenses + ExpenseEntity("3", "Mercado", 300L, "2026-10-20", 1L, 1L)
+        val tags = mapOf("1" to setOf("food", "home"), "2" to setOf("medicine"))
+
+        assertEquals(listOf("1", "3"), filterExpenses(moreExpenses, query = " mercado ", tagIdsByExpense = tags).map { it.id })
+        assertEquals(listOf("1"), filterExpenses(moreExpenses, tagId = "home", tagIdsByExpense = tags).map { it.id })
+        assertEquals(listOf("3"), filterExpenses(moreExpenses, withoutTag = true, tagIdsByExpense = tags).map { it.id })
+        assertEquals(emptyList<String>(), filterExpenses(moreExpenses, tagId = "missing", tagIdsByExpense = tags).map { it.id })
+    }
 }
 
 class FinancialCalculationsTest {

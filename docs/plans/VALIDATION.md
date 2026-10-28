@@ -1,5 +1,13 @@
 ﻿# Registro de Validação
 
+## Auditoria e complementação de testes Data/Domain — 2026-10-28
+
+- Baseline: `rtk .\gradlew.bat testDebugUnitTest` — sucesso antes das alterações.
+- `rtk .\gradlew.bat testDebugUnitTest` — sucesso após as alterações; testes JVM compilados e executados sem falhas.
+- `rtk git diff --check` — sucesso, código 0.
+- `rtk .\gradlew.bat assembleDebug lintDebug` — sucesso; build debug e lint concluídos sem falhas.
+- `connectedDebugAndroidTest` não foi repetido; não houve mudanças de produção, Room ou dependências.
+
 ## Fase 17 — planejamento
 
 Inspeção estática e planejamento somente; nenhum build, teste de backup/restauração, dispositivo ou migração foi executado. [Plano de validação](../phases/phase-17-local-backup/VALIDATION.md). `rtk git diff --check` — sucesso, código 0; verifica alterações rastreadas, não inclui documentos novos não rastreados. Duas tentativas de verificação adicional via `rtk proxy powershell` tiveram erros de citação; detalhes no plano da fase. A busca direta não encontrou espaços finais nos documentos novos.

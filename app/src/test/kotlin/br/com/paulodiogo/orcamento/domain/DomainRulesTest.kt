@@ -85,10 +85,28 @@ class DomainRulesTest {
     }
 
     @Test
+    fun parsesDecimalAmountsWithoutFloatingPointAndRejectsInvalidValues() {
+        assertEquals(1_234L, parseAmountCents(" 12,34 "))
+        assertEquals(1L, parseAmountCents("0.01"))
+        assertThrows(DomainError.InvalidAmount::class.java) { parseAmountCents("0") }
+        assertThrows(DomainError.InvalidAmount::class.java) { parseAmountCents("12.345") }
+        assertThrows(DomainError.InvalidAmount::class.java) { parseAmountCents("not-a-number") }
+    }
+
+    @Test
     fun rejectsInvalidAmountsAndDescriptions() {
         assertThrows(DomainError.NegativeBudget::class.java) { validateBudgetAmount(-1L) }
         assertThrows(DomainError.InvalidAmount::class.java) { validateExpenseAmount(0L) }
         assertThrows(DomainError.EmptyDescription::class.java) { validateDescription("  ") }
+    }
+
+    @Test
+    fun trimsDescriptionsAndDatesAndValidatesMonths() {
+        assertEquals("Compra", validateDescription("  Compra  "))
+        assertEquals("2026-10-01", validateOccurredOn(" 2026-10-01 "))
+        assertEquals("2026-10", validateMonth(" 2026-10 "))
+        assertThrows(DomainError.InvalidDate::class.java) { validateMonth("2026-00") }
+        assertThrows(DomainError.InvalidDate::class.java) { validateOccurredOn("2026/10/01") }
     }
 
     @Test

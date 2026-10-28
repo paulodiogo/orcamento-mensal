@@ -1,5 +1,13 @@
 # Progresso
 
+## Auditoria e complementação de testes Data/Domain — 2026-10-28
+
+Auditoria das 13 classes de produção em `domain` e 12 em `data`, dos testes JVM existentes e dos testes Room/instrumentados relacionados. A matriz resumida identificou lacunas unitárias em parsing decimal, validação de datas/meses, filtros por texto/tag/sem tag e estados/ordenação de execução de orçamento por tag. Foram adicionados cenários em `DomainRulesTest`, `ExpenseFiltersTest` e o novo `TagBudgetExecutionTest`. Repositórios, DAOs e persistência Room já possuem cobertura instrumentada relevante em `BudgetDatabaseTest`, `BudgetOperationsTest`, `TagOperationsTest` e `ExpenseOperationsTest`; por isso não foram duplicados em testes JVM que exigiriam Android/Room. Não foram identificados defeitos de produção.
+
+Matriz antes/depois: validações monetárias e regras financeiras — parcial → ampliada; filtros — mês/período → texto/tag/sem tag também; orçamento por tag — cenários básicos em `DomainRulesTest` → estados, progresso, ordenação e entradas inválidas dedicados; repositórios/DAOs — cobertura Room instrumentada existente → mantida; backup — testes de manifesto/gate existentes → mantidos, SAF/restauração real continuam pendentes.
+
+`testDebugUnitTest` passou antes e depois; `git diff --check` passou. Build, lint e testes instrumentados não foram repetidos porque não houve alteração de produção, persistência ou dependências.
+
 ## Mensagem de backup no topo da tela — implementada e validada tecnicamente
 
 A mensagem de resultado foi movida para imediatamente abaixo da `TopAppBar`, antes do subtítulo e das ações, mantendo o cartão Material 3. `testDebugUnitTest assembleDebug lintDebug` e `git diff --check` passaram em 2026-10-28. Validação manual no dispositivo permanece pendente.
