@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -49,9 +48,11 @@ class BudgetScreenTest {
     @Test
     fun budgetCardUsesCompactAccessibleEditActionWithoutConfirmationText() {
         runBlocking { BudgetOperations(database).save("2026-10", 500_000L) }
+        viewModel.refresh()
         composeRule.setContent { BudgetScreen(viewModel) {} }
         composeRule.waitUntil(5_000) {
-            composeRule.onAllNodes(hasText("2026-10")).fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithContentDescription("Editar orçamento de 2026-10")
+                .fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onAllNodes(hasText("Orçamento confirmado")).assertCountEquals(0)
         composeRule.onAllNodesWithContentDescription("Editar orçamento de 2026-10").assertCountEquals(1)
