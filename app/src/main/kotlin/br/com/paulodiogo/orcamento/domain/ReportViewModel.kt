@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
+import br.com.paulodiogo.orcamento.data.DatabaseOperationGate
 import br.com.paulodiogo.orcamento.data.TagBudgetUsageRow
 import java.time.YearMonth
 import kotlinx.coroutines.Job
@@ -11,7 +12,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancelAndJoin
 
 sealed interface ReportState {
     data object Idle : ReportState
@@ -26,10 +29,14 @@ sealed interface ReportState {
     data class Error(val message: String) : ReportState
 }
 
-class ReportViewModel(private val database: BudgetDatabase) : ViewModel() {
+class ReportViewModel(private var database: BudgetDatabase) : ViewModel() {
     private val _state = MutableStateFlow<ReportState>(ReportState.Idle)
     val state: StateFlow<ReportState> = _state.asStateFlow()
     private var reportJob: Job? = null
+
+    suspend fun pauseDatabaseObservers() {
+        reportJob?.cancelAndJoin()
+    }
 
     fun load(month: String) {
         reportJob?.cancel()
@@ -41,11 +48,19 @@ class ReportViewModel(private val database: BudgetDatabase) : ViewModel() {
                 ?.let { selectedMonth ->
                     val startDate = selectedMonth.atDay(1).toString()
                     val endDate = selectedMonth.atEndOfMonth().toString()
-                    database.expenseDao().observeTagBudgetUsageBetween(startDate, endDate).collectLatest {
-                        loadSnapshot(month, it)
-                    }
+                    runCatching {
+                        database.expenseDao().observeTagBudgetUsageBetween(startDate, endDate).collectLatest {
+                            DatabaseOperationGate.read { loadSnapshot(month, it) }
+                        }
+                    }.onFailure { _state.value = ReportState.Error(it.message ?: "Não foi possível carregar o relatório") }
                 }
         }
+    }
+
+    fun onDatabaseReplaced(database: BudgetDatabase) {
+        this.database = database
+        val month = (state.value as? ReportState.Content)?.month ?: YearMonth.now().toString()
+        load(month)
     }
 
     private suspend fun loadSnapshot(month: String, tagRows: List<TagBudgetUsageRow>) {

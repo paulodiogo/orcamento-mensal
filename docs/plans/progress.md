@@ -1,5 +1,25 @@
 # Progresso
 
+## Mensagem de backup no topo da tela — implementada e validada tecnicamente
+
+A mensagem de resultado foi movida para imediatamente abaixo da `TopAppBar`, antes do subtítulo e das ações, mantendo o cartão Material 3. `testDebugUnitTest assembleDebug lintDebug` e `git diff --check` passaram em 2026-10-28. Validação manual no dispositivo permanece pendente.
+
+## Melhoria das mensagens de backup e restauração — implementada e validada tecnicamente
+
+As mensagens de existência de backups e de conclusão/erro da recuperação agora usam cartões Material 3 com títulos, contagem, contraste e espaçamento consistentes. A mensagem de segurança também foi agrupada em cartão de alerta. `testDebugUnitTest assembleDebug lintDebug` passou em 2026-10-28. A aparência final e o fluxo em dispositivo permanecem sem validação manual.
+
+## Correção do espaçamento superior do cabeçalho de backup — implementada e validada tecnicamente
+
+O `PaddingValues.top` do `Scaffold` deixou de ser aplicado novamente antes da `TopAppBar`; os demais insets foram preservados. `testDebugUnitTest assembleDebug lintDebug` passou em 2026-10-28. Inspeção manual de layout no dispositivo permanece pendente.
+
+## Ajuste do cabeçalho de backup — implementado e validado tecnicamente
+
+A tela de backup agora usa `TopAppBar` Material 3 com ícone de retorno acessível e título na mesma barra; o retorno do sistema é tratado pelo mesmo estado de destino da tela. As ações de criação e restauração não foram alteradas. `testDebugUnitTest assembleDebug lintDebug`, `connectedDebugAndroidTest` e `git diff --check` passaram em 2026-10-28. Inspeção manual de layout responsivo, fontes ampliadas e navegação no dispositivo permanece pendente.
+
+## Fase 17 — planejamento de backup e restauração local
+
+Implementação parcial realizada após autorização em 2026-10-28: `VACUUM INTO`, manifesto JSON/SHA-256, exportação SAF por streams, validação SQLite, tentativa de restauração com cópia anterior/estado persistente e acesso pelo menu da Home. `testDebugUnitTest assembleDebug lintDebug` passou na versão final; não foi reportada contagem no sumário Gradle. `connectedDebugAndroidTest` passou com 43 testes, 0 falhas e 0 ignorados em BUSAO(AVD)-16. Não há teste que exerça provedor SAF real, restauração com arquivo existente ou morte/reinício de processo. Fallback SQLite <3.27 não implementado; a função falha com erro em vez de gerar backup inseguro. A restauração agora recupera a árvore SAF persistida, valida explicitamente o URI de árvore com `DocumentFile.fromTreeUri`, lista somente pares reconhecidos por geração exata e manifesto correspondente, ou pede seleção da pasta existente quando o URI/grant não é utilizável. Não requer criar backup novo. A UI continua com apenas as ações Criar e Restaurar (mais listagem/seleção interna de pares). `connectedDebugAndroidTest` final: 43 testes, 0 falhas/ignorados; o teste novo verifica seleção da pasta existente e ação Restaurar inativa sem par. SAF real ainda não foi exercitado. Pendências A/B/C continuam abertas; detalhes em [status](../phases/phase-17-local-backup/STATUS.md). `rtk git diff --check` passou (código 0); documentos não rastreados foram revisados e verificados separadamente. As tentativas anteriores de checagem alternativa com erros de citação estão no registro de validação; as checagens finais passaram. MinSdk permanece 28.
+
 ## Fase 16 — acompanhamento de orçamento por tag — implementada e validada tecnicamente
 
 Escopo autorizado em 2026-10-27: exibir consumo por tag no mês atual em Home e Relatórios; usar orçamento atual da tag; sem seletor de mês na Home, histórico versionado, migração ou alteração do orçamento global. Planejamento e evidências em `docs/phases/phase-16-tag-budget-usage/`.

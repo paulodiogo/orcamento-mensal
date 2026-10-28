@@ -37,11 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
+import br.com.paulodiogo.orcamento.data.LocalBackupManager
 import br.com.paulodiogo.orcamento.domain.ExpenseListState
 import br.com.paulodiogo.orcamento.domain.ExpenseListViewModel
 import br.com.paulodiogo.orcamento.domain.ReportViewModel
 
 class MainActivity : ComponentActivity() {
+    private var recoveryError = false
     private val viewModel: ExpenseListViewModel by viewModels {
         ExpenseListViewModel.Factory(BudgetDatabase.getInstance(applicationContext))
     }
@@ -57,10 +59,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        runCatching { LocalBackupManager.recoverBeforeRoom(applicationContext) }
+            .onFailure { recoveryError = true }
+        if (recoveryError) br.com.paulodiogo.orcamento.data.DatabaseOperationGate.blockPermanently()
         setContent {
             val darkTheme = isSystemInDarkTheme()
             Surface {
-                AppShell(viewModel, reportViewModel, budgetViewModel, tagViewModel)
+                if (recoveryError) {
+                    androidx.compose.material3.Text("A recuperação do banco precisa de atenção. Os dados foram preservados; contate o suporte.")
+                } else {
+                    AppShell(viewModel, reportViewModel, budgetViewModel, tagViewModel)
+                }
             }
         }
     }

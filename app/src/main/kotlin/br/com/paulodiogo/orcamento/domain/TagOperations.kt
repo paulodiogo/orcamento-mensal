@@ -2,6 +2,7 @@ package br.com.paulodiogo.orcamento.domain
 
 import androidx.room.withTransaction
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
+import br.com.paulodiogo.orcamento.data.DatabaseOperationGate
 import br.com.paulodiogo.orcamento.data.ExpenseTagCrossRef
 import br.com.paulodiogo.orcamento.data.TagEntity
 import java.util.UUID
@@ -15,10 +16,12 @@ class TagOperations(private val database: BudgetDatabase) {
         validateOptionalTagBudget(budgetAmountCents)
         val displayName = displayTagName(name)
         val normalizedName = normalizeTagName(displayName)
-        return database.withTransaction {
-            if (database.tagDao().findByNormalizedName(normalizedName) != null) throw DomainError.DuplicateTag
-            TagEntity(UUID.randomUUID().toString(), displayName, normalizedName, now, now, budgetAmountCents)
-                .also { database.tagDao().insert(it) }
+        return DatabaseOperationGate.write {
+            database.withTransaction {
+                if (database.tagDao().findByNormalizedName(normalizedName) != null) throw DomainError.DuplicateTag
+                TagEntity(UUID.randomUUID().toString(), displayName, normalizedName, now, now, budgetAmountCents)
+                    .also { database.tagDao().insert(it) }
+            }
         }
     }
 
@@ -30,10 +33,12 @@ class TagOperations(private val database: BudgetDatabase) {
         validateOptionalTagBudget(budgetAmountCents)
         val displayName = displayTagName(name)
         val normalizedName = normalizeTagName(displayName)
-        return database.withTransaction {
-            database.tagDao().findByNormalizedName(normalizedName)
-                ?: TagEntity(UUID.randomUUID().toString(), displayName, normalizedName, now, now, budgetAmountCents)
-                    .also { database.tagDao().insert(it) }
+        return DatabaseOperationGate.write {
+            database.withTransaction {
+                database.tagDao().findByNormalizedName(normalizedName)
+                    ?: TagEntity(UUID.randomUUID().toString(), displayName, normalizedName, now, now, budgetAmountCents)
+                        .also { database.tagDao().insert(it) }
+            }
         }
     }
 
@@ -49,16 +54,18 @@ class TagOperations(private val database: BudgetDatabase) {
         validateOptionalTagBudget(budgetAmountCents)
         val displayName = displayTagName(name)
         val normalizedName = normalizeTagName(displayName)
-        return database.withTransaction {
-            val current = database.tagDao().findById(tagId) ?: error("Tag not found")
-            val collision = database.tagDao().findByNormalizedName(normalizedName)
-            if (collision != null && collision.id != tagId) throw DomainError.DuplicateTag
-            current.copy(
-                name = displayName,
-                normalizedName = normalizedName,
-                updatedAt = now,
-                budgetAmountCents = budgetAmountCents,
-            ).also { database.tagDao().update(it) }
+        return DatabaseOperationGate.write {
+            database.withTransaction {
+                val current = database.tagDao().findById(tagId) ?: error("Tag not found")
+                val collision = database.tagDao().findByNormalizedName(normalizedName)
+                if (collision != null && collision.id != tagId) throw DomainError.DuplicateTag
+                current.copy(
+                    name = displayName,
+                    normalizedName = normalizedName,
+                    updatedAt = now,
+                    budgetAmountCents = budgetAmountCents,
+                ).also { database.tagDao().update(it) }
+            }
         }
     }
 
@@ -67,17 +74,19 @@ class TagOperations(private val database: BudgetDatabase) {
     }
 
     suspend fun delete(tagId: String) {
-        database.withTransaction {
-            database.tagDao().deleteAssociations(tagId)
-            database.tagDao().deleteById(tagId)
+        DatabaseOperationGate.write {
+            database.withTransaction {
+                database.tagDao().deleteAssociations(tagId)
+                database.tagDao().deleteById(tagId)
+            }
         }
     }
 
     suspend fun associate(expenseId: String, tagId: String) {
-        database.expenseTagDao().insert(ExpenseTagCrossRef(expenseId, tagId))
+        DatabaseOperationGate.write { database.expenseTagDao().insert(ExpenseTagCrossRef(expenseId, tagId)) }
     }
 
     suspend fun disassociate(expenseId: String, tagId: String) {
-        database.expenseTagDao().delete(expenseId, tagId)
+        DatabaseOperationGate.write { database.expenseTagDao().delete(expenseId, tagId) }
     }
 }

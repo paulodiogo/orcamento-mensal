@@ -20,6 +20,8 @@ abstract class BudgetDatabase : RoomDatabase() {
     abstract fun expenseTagDao(): ExpenseTagDao
 
     companion object {
+        const val SCHEMA_VERSION = 2
+
         val MIGRATION_1_2: Migration = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE tag ADD COLUMN budget_amount_cents INTEGER")
@@ -30,8 +32,8 @@ abstract class BudgetDatabase : RoomDatabase() {
         private var instance: BudgetDatabase? = null
 
         fun getInstance(context: Context): BudgetDatabase =
-            instance ?: synchronized(this) {
-                instance ?: Room.databaseBuilder(
+            instance?.takeUnless { it.isOpen.not() } ?: synchronized(this) {
+                instance?.takeUnless { it.isOpen.not() } ?: Room.databaseBuilder(
                     context.applicationContext,
                     BudgetDatabase::class.java,
                     "budget.db",
@@ -39,5 +41,16 @@ abstract class BudgetDatabase : RoomDatabase() {
                     .addMigrations(MIGRATION_1_2)
                     .build().also { instance = it }
             }
+
+        @Synchronized
+        fun closeInstance() {
+            instance?.close()
+            instance = null
+        }
+
+        @Synchronized
+        fun clearInstance() {
+            instance = null
+        }
     }
 }

@@ -4,14 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
+import br.com.paulodiogo.orcamento.data.DatabaseOperationGate
 import br.com.paulodiogo.orcamento.data.ExpenseEntity
 import br.com.paulodiogo.orcamento.data.TagEntity
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 sealed interface ExpenseListState {
@@ -29,8 +31,8 @@ data class ExpenseFormState(
     val saved: Boolean = false,
 )
 
-class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
-    private val operations = ExpenseOperations(database)
+class ExpenseListViewModel(private var database: BudgetDatabase) : ViewModel() {
+    private var operations = ExpenseOperations(database)
     private val _state = MutableStateFlow<ExpenseListState>(ExpenseListState.Loading)
     val state: StateFlow<ExpenseListState> = _state.asStateFlow()
     private val _tags = MutableStateFlow<List<TagEntity>>(emptyList())
@@ -48,20 +50,37 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
     private var currentTagId: String? = null
     private var currentWithoutTag = false
 
+    private var observationJob: Job? = null
+
     init {
-        database.expenseDao().observeAll()
-            .onEach { expenses -> publish(expenses) }
-            .launchIn(viewModelScope)
-        database.tagDao().observeAll()
-            .onEach { tags ->
-                _tags.value = tags
-                currentTagId?.let { selected ->
-                    if (tags.none { it.id == selected }) currentTagId = null
+        observeDatabase()
+    }
+
+    private fun observeDatabase() {
+        observationJob?.cancel()
+        observationJob = viewModelScope.launch {
+            runCatching {
+                kotlinx.coroutines.flow.combine(database.expenseDao().observeAll(), database.tagDao().observeAll()) { expenses, tags ->
+                    expenses to tags
+                }.collect { (expenses, tags) ->
+                    _tags.value = tags
+                    currentTagId?.let { selected -> if (tags.none { it.id == selected }) currentTagId = null }
+                    DatabaseOperationGate.read { publish(expenses) }
                 }
-                publish(currentExpenses)
-            }
-            .catch { _state.value = ExpenseListState.Error(it.message ?: "Não foi possível carregar as tags") }
-            .launchIn(viewModelScope)
+            }.onFailure { _state.value = ExpenseListState.Error(it.message ?: "Não foi possível carregar os dados") }
+        }
+    }
+
+    suspend fun pauseDatabaseObservers() {
+        observationJob?.cancelAndJoin()
+    }
+
+    fun onDatabaseReplaced(database: BudgetDatabase) {
+        this.database = database
+        operations = ExpenseOperations(database)
+        _editing.value = null
+        _state.value = ExpenseListState.Loading
+        observeDatabase()
     }
 
     private suspend fun publish(expenses: List<ExpenseEntity>) {
@@ -103,15 +122,20 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
         currentWithoutTag = withoutTag
         _state.value = ExpenseListState.Loading
         viewModelScope.launch {
-            publish(operations.findAll())
+            DatabaseOperationGate.read { publish(operations.findAll()) }
         }
     }
 
     fun clearFilters() = refresh("", null, null, null, null, false)
 
+    fun onDatabaseReplaced() {
+        _editing.value = null
+        refresh()
+    }
+
     fun edit(id: String) {
         viewModelScope.launch {
-            _editing.value = operations.findByIdWithTags(id)?.let { it.first to it.second.toSet() }
+            _editing.value = DatabaseOperationGate.read { operations.findByIdWithTags(id)?.let { it.first to it.second.toSet() } }
         }
     }
 
@@ -146,8 +170,10 @@ class ExpenseListViewModel(private val database: BudgetDatabase) : ViewModel() {
         viewModelScope.launch {
             try {
                 runCatching {
-                    operations.update(expense, description, amountCents, occurredOn)
-                    operations.updateTags(expense.id, tagIds)
+                    DatabaseOperationGate.write {
+                        operations.update(expense, description, amountCents, occurredOn)
+                        operations.updateTags(expense.id, tagIds)
+                    }
                 }.onSuccess { onComplete(); refresh() }
                     .onFailure { error -> _state.value = ExpenseListState.Error(error.message ?: "Não foi possível atualizar o lançamento") }
             } finally {

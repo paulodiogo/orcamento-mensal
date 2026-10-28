@@ -5,6 +5,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -34,6 +35,55 @@ import java.time.format.DateTimeFormatter
 class MainActivityComposeTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun backupScreenCanOfferExistingFolderWithoutRequiringCreateBackup() {
+        composeRule.setContent {
+            BackupScreen(
+                padding = androidx.compose.foundation.layout.PaddingValues(),
+                busy = false,
+                message = null,
+                lastBackupName = null,
+                onBack = {},
+                folderSelected = false,
+                backups = emptyList(),
+                selectedGeneration = null,
+                onCreate = {},
+                onRestore = {},
+                onChooseBackupFolder = {},
+                onSelectBackup = {},
+            )
+        }
+        composeRule.onNodeWithText("Selecionar pasta existente para restaurar").assertTextContains("Selecionar pasta existente para restaurar")
+        composeRule.onNodeWithText("Restaurar backup").assertIsNotEnabled()
+    }
+
+    @Test
+    fun backupScreenOffersOnlyCreateAndRestoreActions() {
+        composeRule.setContent {
+            BackupScreen(
+                padding = androidx.compose.foundation.layout.PaddingValues(),
+                busy = false,
+                message = null,
+                lastBackupName = "backup.db",
+                onBack = {},
+                folderSelected = true,
+                backups = emptyList(),
+                selectedGeneration = null,
+                onCreate = {},
+                onRestore = {},
+                onChooseBackupFolder = {},
+                onSelectBackup = {},
+            )
+        }
+        composeRule.onNodeWithText("Criar backup").assertTextContains("Criar backup")
+        composeRule.onNodeWithText("Restaurar backup").assertTextContains("Restaurar backup")
+        org.junit.Assert.assertEquals(
+            0,
+            composeRule.onAllNodes(androidx.compose.ui.test.hasText("Selecionar arquivo SQLite") or androidx.compose.ui.test.hasText("Selecionar manifesto do backup"), useUnmergedTree = true)
+                .fetchSemanticsNodes().size,
+        )
+    }
 
     @Test
     fun formDisplaysAccessibleFieldsAndValidatesEmptyInput() {

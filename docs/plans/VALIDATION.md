@@ -1,5 +1,53 @@
 ﻿# Registro de Validação
 
+## Fase 17 — planejamento
+
+Inspeção estática e planejamento somente; nenhum build, teste de backup/restauração, dispositivo ou migração foi executado. [Plano de validação](../phases/phase-17-local-backup/VALIDATION.md). `rtk git diff --check` — sucesso, código 0; verifica alterações rastreadas, não inclui documentos novos não rastreados. Duas tentativas de verificação adicional via `rtk proxy powershell` tiveram erros de citação; detalhes no plano da fase. A busca direta não encontrou espaços finais nos documentos novos.
+
+### Revisão do protocolo da Fase 17 — 2026-10-28
+
+`rtk git diff --check` — código 0 para arquivos rastreados; documentos novos não rastreados verificados separadamente por busca direta de espaços finais e marcadores de conflito, sem ocorrências. `rtk git status --short --branch` — código 0; revisão restrita a documentação. Sem build ou testes funcionais. Detalhes e pendências em [VALIDATION.md](../phases/phase-17-local-backup/VALIDATION.md).
+
+### Mensagem de backup no topo da tela — 2026-10-28
+
+- A mensagem de resultado agora é exibida imediatamente abaixo da barra superior, antes do subtítulo e das ações.
+- `rtk .\\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso.
+- `rtk git diff --check` — sucesso.
+- Validação manual no dispositivo ainda não executada.
+
+### Melhoria das mensagens de backup e restauração — 2026-10-28
+
+- A existência de backups passou a ser exibida em um cartão informativo com título e quantidade, em vez de mensagem solta e nome duplicado.
+- A mensagem de resultado da recuperação passou a ser exibida em cartão destacado, com melhor contraste e espaçamento.
+- A mensagem de segurança também foi agrupada em cartão de alerta.
+- `rtk .\\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso.
+- A validação manual da aparência final e do fluxo de restauração permanece pendente.
+
+### Correção do espaçamento superior do cabeçalho de backup — 2026-10-28
+
+- Removido o `top` duplicado do `Scaffold` antes da `TopAppBar`, preservando somente os demais insets.
+- `rtk .\\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso.
+- A inspeção manual em dispositivo continua pendente.
+
+### Ajuste do cabeçalho de backup — 2026-10-28
+
+- `rtk .\\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso; testes JVM, compilação de debug e lint concluídos sem falhas.
+- `rtk .\\gradlew.bat connectedDebugAndroidTest` — sucesso no BUSAO(AVD)-16; testes instrumentados concluídos sem falhas reportadas pelo Gradle.
+- `rtk git diff --check` — sucesso, código 0.
+- Não foi realizada inspeção manual de layout, fontes ampliadas ou navegação em dispositivo nesta alteração; esses cenários permanecem sem evidência manual.
+
+### Implementação parcial da Fase 17 — 2026-10-28
+
+`rtk .\\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso final; Gradle reportou 31 testes JVM aprovados. `rtk .\\gradlew.bat connectedDebugAndroidTest` — sucesso em BUSAO(AVD)-16; 41 testes, 0 falhas e 0 ignorados conforme relatório. Dois testes JVM novos cobrem gate e campos do manifesto, não integração SAF, snapshot real ou restauração.
+
+### Revalidação final da implementação — 2026-10-28
+
+`rtk .\\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso; `rtk .\\gradlew.bat connectedDebugAndroidTest` — sucesso em BUSAO(AVD)-16, 41 testes, 0 falhas/ignorados. `rtk git diff --check` — código 0. Nenhuma execução real SAF ou restauração.
+
+### Harmonização de snapshot e manifesto — 2026-10-28
+
+`rtk git diff --check` — código 0 nos arquivos rastreados; busca separada nos documentos novos sem espaços finais ou marcadores de conflito. Inspeção confirmou `minSdk 28`, não 26; consulta à documentação SQLite confirmou `VACUUM INTO` desde 3.27.0, sem comprovar disponibilidade do driver em runtime. Nenhum build ou teste funcional executado. [Validação da fase](../phases/phase-17-local-backup/VALIDATION.md).
+
 ## Fase 15 — implementação de orçamento associado a tags
 
 - `rtk .\gradlew.bat testDebugUnitTest` — sucesso.

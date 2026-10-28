@@ -4,14 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
+import br.com.paulodiogo.orcamento.data.DatabaseOperationGate
 import br.com.paulodiogo.orcamento.data.TagEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancelAndJoin
 
 sealed interface TagState {
     data object Loading : TagState
@@ -20,20 +20,38 @@ sealed interface TagState {
     data class Error(val message: String) : TagState
 }
 
-class TagViewModel(private val database: BudgetDatabase) : ViewModel() {
-    private val operations = TagOperations(database)
+class TagViewModel(private var database: BudgetDatabase) : ViewModel() {
+    private var operations = TagOperations(database)
     private val _state = MutableStateFlow<TagState>(TagState.Loading)
     val state: StateFlow<TagState> = _state.asStateFlow()
 
-    init {
-        database.tagDao().observeAll()
-            .onEach { tags -> _state.value = if (tags.isEmpty()) TagState.Empty else TagState.Content(tags) }
-            .catch { _state.value = TagState.Error(it.message ?: "Não foi possível carregar as tags") }
-            .launchIn(viewModelScope)
-    }
+    init { observeDatabase() }
 
     fun refresh() {
-        // Kept for callers that explicitly request a refresh; the Room flow is authoritative.
+        // The Room flow remains authoritative; this method is kept for existing callers.
+    }
+
+    fun onDatabaseReplaced(database: BudgetDatabase) {
+        this.database = database
+        operations = TagOperations(database)
+        _state.value = TagState.Loading
+        observeDatabase()
+    }
+
+    private var observationJob: kotlinx.coroutines.Job? = null
+
+    suspend fun pauseDatabaseObservers() {
+        observationJob?.cancelAndJoin()
+    }
+
+    private fun observeDatabase() {
+        observationJob?.cancel()
+        observationJob = viewModelScope.launch {
+            runCatching {
+                database.tagDao().observeAll()
+                    .collect { tags -> _state.value = if (tags.isEmpty()) TagState.Empty else TagState.Content(tags) }
+            }.onFailure { _state.value = TagState.Error(it.message ?: "Não foi possível carregar as tags") }
+        }
     }
 
     fun save(
@@ -45,8 +63,10 @@ class TagViewModel(private val database: BudgetDatabase) : ViewModel() {
     ) {
         viewModelScope.launch {
             runCatching {
-                if (editingId == null) operations.create(name, budgetAmountCents)
-                else operations.update(editingId, name, budgetAmountCents)
+                DatabaseOperationGate.write {
+                    if (editingId == null) operations.create(name, budgetAmountCents)
+                    else operations.update(editingId, name, budgetAmountCents)
+                }
             }.onSuccess { refresh(); onComplete() }
                 .onFailure {
                     _state.value = TagState.Error(it.message ?: "Não foi possível salvar a tag")
@@ -57,7 +77,7 @@ class TagViewModel(private val database: BudgetDatabase) : ViewModel() {
 
     fun delete(id: String, onComplete: () -> Unit = {}) {
         viewModelScope.launch {
-            runCatching { operations.delete(id) }
+            runCatching { DatabaseOperationGate.write { operations.delete(id) } }
                 .onSuccess { refresh(); onComplete() }
                 .onFailure { _state.value = TagState.Error(it.message ?: "Não foi possível excluir a tag") }
         }

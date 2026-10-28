@@ -1,6 +1,7 @@
 package br.com.paulodiogo.orcamento.domain
 
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
+import br.com.paulodiogo.orcamento.data.DatabaseOperationGate
 import br.com.paulodiogo.orcamento.data.BudgetEntity
 import java.time.YearMonth
 
@@ -21,12 +22,13 @@ class BudgetOperations(private val database: BudgetDatabase) {
             ?.amountCents
     }
 
-    suspend fun save(month: String, amountCents: Long, now: Long = System.currentTimeMillis()): BudgetEntity {
-        val validMonth = validateMonth(month)
-        validateBudgetAmount(amountCents)
-        val existing = database.budgetDao().findByMonth(validMonth)
-        val budget = BudgetEntity(validMonth, amountCents, existing?.createdAt ?: now, now)
-        database.budgetDao().save(budget)
-        return budget
-    }
+    suspend fun save(month: String, amountCents: Long, now: Long = System.currentTimeMillis()): BudgetEntity =
+        DatabaseOperationGate.write {
+            val validMonth = validateMonth(month)
+            validateBudgetAmount(amountCents)
+            val existing = database.budgetDao().findByMonth(validMonth)
+            val budget = BudgetEntity(validMonth, amountCents, existing?.createdAt ?: now, now)
+            database.budgetDao().save(budget)
+            budget
+        }
 }

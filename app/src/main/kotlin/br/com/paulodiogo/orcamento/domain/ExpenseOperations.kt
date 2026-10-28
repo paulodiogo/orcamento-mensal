@@ -2,6 +2,7 @@ package br.com.paulodiogo.orcamento.domain
 
 import androidx.room.withTransaction
 import br.com.paulodiogo.orcamento.data.BudgetDatabase
+import br.com.paulodiogo.orcamento.data.DatabaseOperationGate
 import br.com.paulodiogo.orcamento.data.ExpenseEntity
 import br.com.paulodiogo.orcamento.data.ExpenseTagCrossRef
 import java.util.UUID
@@ -23,10 +24,12 @@ class ExpenseOperations(private val database: BudgetDatabase) {
             createdAt = now,
             updatedAt = now,
         )
-        database.withTransaction {
-            database.expenseDao().insert(expense)
-            validateTagIds(tagIds)
-            database.expenseTagDao().insertAll(tagIds.distinct().map { ExpenseTagCrossRef(id, it) })
+        DatabaseOperationGate.write {
+            database.withTransaction {
+                database.expenseDao().insert(expense)
+                validateTagIds(tagIds)
+                database.expenseTagDao().insertAll(tagIds.distinct().map { ExpenseTagCrossRef(id, it) })
+            }
         }
         return expense
     }
@@ -47,7 +50,7 @@ class ExpenseOperations(private val database: BudgetDatabase) {
         amountCents: Long = expense.amountCents,
         occurredOn: String = expense.occurredOn,
         now: Long = System.currentTimeMillis(),
-    ): ExpenseEntity {
+    ): ExpenseEntity = DatabaseOperationGate.write {
         val updated = expense.copy(
             description = validateDescription(description),
             amountCents = amountCents.also(::validateExpenseAmount),
@@ -55,14 +58,16 @@ class ExpenseOperations(private val database: BudgetDatabase) {
             updatedAt = now,
         )
         database.expenseDao().update(updated)
-        return updated
+        updated
     }
 
-    suspend fun updateTags(expenseId: String, tagIds: List<String>) = database.withTransaction {
-        if (database.expenseDao().findById(expenseId) == null) error("Expense not found")
-        validateTagIds(tagIds)
-        database.expenseTagDao().deleteForExpense(expenseId)
-        database.expenseTagDao().insertAll(tagIds.distinct().map { ExpenseTagCrossRef(expenseId, it) })
+    suspend fun updateTags(expenseId: String, tagIds: List<String>) = DatabaseOperationGate.write {
+        database.withTransaction {
+            if (database.expenseDao().findById(expenseId) == null) error("Expense not found")
+            validateTagIds(tagIds)
+            database.expenseTagDao().deleteForExpense(expenseId)
+            database.expenseTagDao().insertAll(tagIds.distinct().map { ExpenseTagCrossRef(expenseId, it) })
+        }
     }
 
     private suspend fun validateTagIds(tagIds: List<String>) {
@@ -71,8 +76,10 @@ class ExpenseOperations(private val database: BudgetDatabase) {
         }
     }
 
-    suspend fun delete(id: String): Boolean = database.withTransaction {
-        database.expenseTagDao().deleteForExpense(id)
-        database.expenseDao().deleteById(id) > 0
+    suspend fun delete(id: String): Boolean = DatabaseOperationGate.write {
+        database.withTransaction {
+            database.expenseTagDao().deleteForExpense(id)
+            database.expenseDao().deleteById(id) > 0
+        }
     }
 }

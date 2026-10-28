@@ -24,7 +24,7 @@ Aplicativo Android para registrar despesas e acompanhar o orçamento mensal, com
 - Tag sem orçamento é exibida como **Sem orçamento**, sem percentual ou barra de consumo. Orçamento igual a zero não gera percentual numérico; gasto positivo é indicado como acima do orçamento.
 - Percentuais são arredondados para duas casas apenas para exibição. A barra visual não ultrapassa 100%, mas o percentual apresentado mantém o valor real, inclusive acima de 100%.
 - A Home usa o mês atual local e não oferece seletor de mês. Relatórios e configuração do orçamento permitem escolher o mês.
-- O aplicativo atualmente trata despesas; não documenta receitas, sincronização, exportação, importação ou backup de dados.
+- O aplicativo atualmente trata despesas; não implementa receitas, sincronização ou exportação/importação de registros. A Fase 17 adiciona backup e restauração local em desenvolvimento, via SQLite e manifesto JSON, SAF e restauração com recuperação; confira [status e limitações](docs/phases/phase-17-local-backup/STATUS.md).
 
 ## Tecnologias
 

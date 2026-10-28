@@ -19,4 +19,16 @@
     <string name="expense_required_fields">Preencha todos os campos</string>
     <string name="expense_amount_positive">O valor da despesa deve ser maior que zero.</string>
     <string name="save_in_progress">Salvando...</string>
+    <string name="backup_menu">Backup e restauração</string>
+    <string name="backup_title">Backup e restauração</string>
+    <string name="backup_subtitle">Gerencie uma cópia local dos seus dados financeiros.</string>
+    <string name="backup_security_notice">O arquivo contém dados financeiros pessoais legíveis e não é criptografado. Guarde-o em local protegido.</string>
+    <string name="backup_create">Criar backup</string>
+    <string name="backup_destination_required">Selecione a pasta de destino ao criar o primeiro backup.</string>
+    <string name="backup_none_available">Nenhum backup local registrado. Crie um backup antes de restaurar.</string>
+    <string name="backup_no_backups_title">Nenhum backup encontrado</string>
+    <string name="backup_available_title">Backups disponíveis</string>
+    <string name="backup_available_count">%1$d backups encontrados. Selecione um para restaurar.</string>
+    <string name="backup_restore">Restaurar backup</string>
+    <string name="backup_back">Voltar</string>
 </resources>
