@@ -31,13 +31,29 @@ class TagOperations(private val database: BudgetDatabase) {
         now: Long = System.currentTimeMillis(),
     ): TagEntity {
         validateOptionalTagBudget(budgetAmountCents)
+        return DatabaseOperationGate.write {
+            database.withTransaction { createOrReuseInTransaction(name, budgetAmountCents, now) }
+        }
+    }
+
+    internal suspend fun createOrReuseInTransaction(
+        name: String,
+        budgetAmountCents: Long? = null,
+        now: Long = System.currentTimeMillis(),
+    ): TagEntity {
+        validateOptionalTagBudget(budgetAmountCents)
         val displayName = displayTagName(name)
         val normalizedName = normalizeTagName(displayName)
-        return DatabaseOperationGate.write {
+        return database.tagDao().findByNormalizedName(normalizedName)
+            ?: TagEntity(UUID.randomUUID().toString(), displayName, normalizedName, now, now, budgetAmountCents)
+                .also { database.tagDao().insert(it) }
+    }
+
+    suspend fun initializeDefaultTags(now: Long = System.currentTimeMillis()) {
+        DatabaseOperationGate.write {
             database.withTransaction {
-                database.tagDao().findByNormalizedName(normalizedName)
-                    ?: TagEntity(UUID.randomUUID().toString(), displayName, normalizedName, now, now, budgetAmountCents)
-                        .also { database.tagDao().insert(it) }
+                createOrReuseInTransaction("Alimentação", now = now)
+                createOrReuseInTransaction("Mercado", now = now)
             }
         }
     }

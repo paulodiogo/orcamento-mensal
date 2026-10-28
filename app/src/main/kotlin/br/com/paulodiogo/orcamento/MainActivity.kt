@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +42,8 @@ import br.com.paulodiogo.orcamento.data.LocalBackupManager
 import br.com.paulodiogo.orcamento.domain.ExpenseListState
 import br.com.paulodiogo.orcamento.domain.ExpenseListViewModel
 import br.com.paulodiogo.orcamento.domain.ReportViewModel
+import br.com.paulodiogo.orcamento.domain.TagOperations
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private var recoveryError = false
@@ -62,6 +65,10 @@ class MainActivity : ComponentActivity() {
         runCatching { LocalBackupManager.recoverBeforeRoom(applicationContext) }
             .onFailure { recoveryError = true }
         if (recoveryError) br.com.paulodiogo.orcamento.data.DatabaseOperationGate.blockPermanently()
+        if (!recoveryError) {
+            val database = BudgetDatabase.getInstance(applicationContext)
+            lifecycleScope.launch { TagOperations(database).initializeDefaultTags() }
+        }
         setContent {
             val darkTheme = isSystemInDarkTheme()
             Surface {

@@ -19,6 +19,9 @@ interface ExpenseTagDao {
     @Query("SELECT COUNT(*) FROM expense_tag WHERE tagId = :tagId")
     suspend fun countForTag(tagId: String): Int
 
+    @Query("SELECT COUNT(*) FROM expense_tag")
+    suspend fun count(): Int
+
     @Query("SELECT tagId FROM expense_tag WHERE expenseId = :expenseId")
     suspend fun findTagIdsForExpense(expenseId: String): List<String>
 

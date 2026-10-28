@@ -1,5 +1,12 @@
 ﻿# Registro de Validação
 
+## Tags padrão na primeira inicialização — 2026-10-28
+
+- A inicialização idempotente de `Alimentação` e `Mercado` foi integrada ao `MainActivity` usando `TagOperations` e uma transação Room; tags existentes e dados financeiros são preservados.
+- `rtk .\gradlew.bat testDebugUnitTest assembleDebug lintDebug` — sucesso.
+- `rtk .\gradlew.bat connectedDebugAndroidTest` — não executado: falhou antes de iniciar por não haver dispositivo conectado (`DeviceException: No connected devices!`).
+- `rtk git diff --check` — sucesso, código 0.
+
 ## Auditoria e complementação de testes Data/Domain — 2026-10-28
 
 - Baseline: `rtk .\gradlew.bat testDebugUnitTest` — sucesso antes das alterações.

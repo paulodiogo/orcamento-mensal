@@ -1,5 +1,9 @@
 # Progresso
 
+## Tags padrão na primeira inicialização — implementadas e parcialmente validadas
+
+`TagOperations.initializeDefaultTags` cria `Alimentação` e `Mercado` na mesma transação, reutiliza tags existentes sem sobrescrever dados e não cria registros financeiros. A execução é disparada no `MainActivity` após a recuperação do banco. Testes instrumentados cobrem inicialização, idempotência, criação parcial e preservação de dados. `testDebugUnitTest assembleDebug lintDebug` e `git diff --check` passaram. `connectedDebugAndroidTest` ficou bloqueado por ausência de dispositivo conectado.
+
 ## Auditoria e complementação de testes Data/Domain — 2026-10-28
 
 Auditoria das 13 classes de produção em `domain` e 12 em `data`, dos testes JVM existentes e dos testes Room/instrumentados relacionados. A matriz resumida identificou lacunas unitárias em parsing decimal, validação de datas/meses, filtros por texto/tag/sem tag e estados/ordenação de execução de orçamento por tag. Foram adicionados cenários em `DomainRulesTest`, `ExpenseFiltersTest` e o novo `TagBudgetExecutionTest`. Repositórios, DAOs e persistência Room já possuem cobertura instrumentada relevante em `BudgetDatabaseTest`, `BudgetOperationsTest`, `TagOperationsTest` e `ExpenseOperationsTest`; por isso não foram duplicados em testes JVM que exigiriam Android/Room. Não foram identificados defeitos de produção.

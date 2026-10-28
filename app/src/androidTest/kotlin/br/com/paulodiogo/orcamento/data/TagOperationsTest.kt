@@ -44,6 +44,52 @@ class TagOperationsTest {
     }
 
     @Test
+    fun initializesDefaultTagsIdempotentlyWithoutFinancialRecords() = runBlocking {
+        operations.initializeDefaultTags(now = 10L)
+        operations.initializeDefaultTags(now = 20L)
+
+        assertEquals(listOf("Alimentação", "Mercado"), database.tagDao().findAll().map { it.name })
+        assertEquals(2, database.tagDao().count())
+        assertEquals(0, database.budgetDao().count())
+        assertEquals(0, database.expenseDao().count())
+        assertEquals(0, database.expenseTagDao().count())
+        assertEquals(10L, database.tagDao().findByNormalizedName("alimentação")?.createdAt)
+
+        val custom = operations.createOrReuse("Personalizada", budgetAmountCents = 12_000L, now = 30L)
+        operations.initializeDefaultTags(now = 40L)
+        assertEquals(custom, database.tagDao().findById(custom.id))
+        assertEquals(3, database.tagDao().count())
+    }
+
+    @Test
+    fun initializesOnlyMissingDefaultTagsAndPreservesExistingValues() = runBlocking {
+        val food = operations.createOrReuse("Alimentação", budgetAmountCents = 5_000L, now = 1L)
+        operations.initializeDefaultTags(now = 2L)
+
+        assertEquals(food, database.tagDao().findById(food.id))
+        assertNotNull(database.tagDao().findByNormalizedName("mercado"))
+        assertEquals(2, database.tagDao().count())
+    }
+
+    @Test
+    fun initializesFoodWhenOnlyMarketExists() = runBlocking {
+        operations.createOrReuse("Mercado")
+        operations.initializeDefaultTags()
+
+        assertNotNull(database.tagDao().findByNormalizedName("alimentação"))
+        assertEquals(2, database.tagDao().count())
+    }
+
+    @Test
+    fun doesNothingWhenBothDefaultTagsExist() = runBlocking {
+        val food = operations.createOrReuse("Alimentação")
+        val market = operations.createOrReuse("Mercado")
+        operations.initializeDefaultTags(now = 2L)
+
+        assertEquals(listOf(food, market), database.tagDao().findAll())
+    }
+
+    @Test
     fun createdTagAppearsInReactiveQuery() = runBlocking {
         val created = operations.createOrReuse("Recente")
 
