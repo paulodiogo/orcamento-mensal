@@ -21,6 +21,8 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 data class AvailableBackup(val databaseUri: Uri, val manifestUri: Uri, val displayName: String, val generationId: String)
 
@@ -151,7 +153,7 @@ class LocalBackupManager(context: Context) {
         val files = folder.listFiles().associateBy { it.name ?: "" }
             .mapValues { (_, document) -> document.uri }
         require(files.isNotEmpty() || folder.canRead()) { "Não foi possível listar a pasta de backups" }
-        val pattern = Regex("orcamento-backup-\\d{4}-\\d{2}-\\d{2}-([0-9a-fA-F-]{36})\\.db")
+        val pattern = Regex("orcamento-backup-(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})\\.db")
         val found = mutableListOf<AvailableBackup>()
         files.keys.filter { it.matches(pattern) }.forEach { databaseName ->
             val match = pattern.matchEntire(databaseName) ?: return@forEach
@@ -276,7 +278,12 @@ class LocalBackupManager(context: Context) {
     }
 
     private fun createBackupBlocking(treeUri: Uri) {
-        val generation = UUID.randomUUID().toString()
+
+        val dataHora = LocalDateTime.now()
+
+        val formatador = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
+        val generation = dataHora.format(formatador)
+
         val temporaryDirectory = File(appContext.cacheDir, "backup-$generation")
         val snapshot = File(temporaryDirectory, "budget.db")
         val manifest = File(temporaryDirectory, "backup.manifest.json")
@@ -315,7 +322,7 @@ class LocalBackupManager(context: Context) {
             manifest.writeText(manifestJson.toString(), Charsets.UTF_8)
             persistBackupState("SNAPSHOT_READY|$generation|${temporaryDirectory.name}|$size|$digest")
             val directory = ensureBackupDirectory(treeUri)
-            val base = "orcamento-backup-${LocalDate.now(ZoneOffset.UTC)}-$generation"
+            val base = "orcamento-backup-$generation"
             persistBackupState("EXPORTING|$generation|${temporaryDirectory.name}|${directory}|$base")
             val dbUri = writeDocument(directory, "$base.db.partial", snapshot)
             val manifestUri = writeBytesDocument(directory, "$base.manifest.json.partial", manifest.readBytes())
@@ -365,7 +372,7 @@ class LocalBackupManager(context: Context) {
             copyUriToFile(manifestUri, manifestFile)
             val json = JSONObject(manifestFile.readText(Charsets.UTF_8))
             require(json.getInt("format_version") == 1) { "Formato de backup não suportado" }
-            require(json.getString("generation_id").matches(Regex("[0-9a-fA-F-]{36}"))) { "Geração de backup inválida" }
+            require(json.getString("generation_id").matches(Regex("(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})"))) { "Geração de backup inválida" }
             require(json.getString("database_name") == "budget.db") { "Manifesto não corresponde ao banco" }
             require(json.getString("sha256").matches(Regex("[0-9a-f]{64}"))) { "Checksum do manifesto inválido" }
             require(json.getLong("size_bytes") > 0L) { "Tamanho do manifesto inválido" }
